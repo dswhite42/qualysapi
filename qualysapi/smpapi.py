@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 import pprint
 import json
 
-#smp libs
+# smp libs
 import multiprocessing
 import threading
 
@@ -23,7 +23,7 @@ from qualysapi.api_actions import QGActions
 # for exceptions
 import queue
 
-#debug
+# debug
 
 class BufferQueue(multiprocessing.queues.JoinableQueue):
     '''A thread/process safe queue for append/pop operations with the import
@@ -33,7 +33,7 @@ class BufferQueue(multiprocessing.queues.JoinableQueue):
     '''
 
     def __init__(self, **kwargs):
-        super(BufferQueue,self).__init__(**kwargs)
+        super(BufferQueue, self).__init__(**kwargs)
 
     def consume(self, lim):
         '''Consume up to but no more than lim elements and return them in a new
@@ -51,12 +51,12 @@ class BufferStats(object):
     '''A simple wrapper for statistics about speeds and times.'''
     processed = 0
 
-    #data processing stats
+    # data processing stats
     updates = 0
     adds = 0
     deletes = 0
 
-    #time stats
+    # time stats
     start_time = None
     end_time = None
 
@@ -70,19 +70,19 @@ class BufferStats(object):
         '''
         Increase updates..
         '''
-        self.updates+=1
+        self.updates += 1
 
     def increment_insertions(self):
         '''
         Increase additions.
         '''
-        self.adds+=1
+        self.adds += 1
 
     def decrement(self):
         '''
         Increase deleted items
         '''
-        self.deletes+=1
+        self.deletes += 1
 
 
 class BufferConsumer(multiprocessing.Process):
@@ -95,11 +95,11 @@ class BufferConsumer(multiprocessing.Process):
     the process controller to end all processing and then pass of the error to
     the response error handler.
     '''
-    bite_size    = 1
-    queue        = None
+    bite_size = 1
+    queue = None
     results_list = None
-    response_err = None #: event to communicate with queue.  Optional.
-    #logger       = None
+    response_err = None  # : event to communicate with queue.  Optional.
+    # logger       = None
     results_queue = None
     def __init__(self, **kwargs):
         '''
@@ -111,7 +111,7 @@ class BufferConsumer(multiprocessing.Process):
         consuemrs to alert that there is a critical consumer failure so that it
         can stop processing and raise a fatal exception.
         '''
-        #self.logger = getLogger(__class__.__name__)
+        # self.logger = getLogger(__class__.__name__)
         self.bite_size = kwargs.pop('bite_size', 1000)
         self.queue = kwargs.pop('queue', None)
         if self.queue is None:
@@ -121,10 +121,10 @@ class BufferConsumer(multiprocessing.Process):
         self.results_queue = kwargs.pop('results_queue', None)
         self.response_error = kwargs.pop('response_error', None)
         self.setUp()
-        #work set the process name to the consumer.
+        # work set the process name to the consumer.
         if not 'name' in kwargs:
             kwargs['name'] = __class__.__name__
-        super(BufferConsumer, self).__init__(**kwargs) #pass to parent
+        super(BufferConsumer, self).__init__(**kwargs)  # pass to parent
 
 
     def singleItemHandler(self, item):
@@ -145,8 +145,8 @@ class BufferConsumer(multiprocessing.Process):
     def cleanUp(self):
         '''Final processing command to flush any cached data, persist to the
         database, etc...'''
-        #give time for results_queue to flush, then force cancel.
-        #the queue creator and not this consumer are responsible.
+        # give time for results_queue to flush, then force cancel.
+        # the queue creator and not this consumer are responsible.
         time.sleep(0.3)
         self.results_queue.cancel_join_thread()
         pass
@@ -161,36 +161,38 @@ class BufferConsumer(multiprocessing.Process):
         '''
         while True:
             try:
-                item = self.queue.get(timeout=3)
-                #the base class just logs this stuff
+                item = self.queue.get(timeout=10)
+                # the base class just logs this stuff
+                logger.debug("processing %s" % str(item)[:50])
                 rval = self.singleItemHandler(item)
-                self.queue.task_done()
                 if rval and self.results_queue:
                     self.results_queue.put(rval)
+                    self.queue.task_done()
+                    logger.debug("processed %s" % str(rval)[:50])
             except queue.Empty:
-                logger.debug('Queue timed out after 3 seconds.')
+                logger.debug('Queue timed out after 10 seconds.')
+                self.queue.close()
                 break
             except EOFError:
                 info(
                     '%s has finished consuming queue.' % (__class__.__name__))
                 break
             except Exception as e:
-                #general thread exception.
+                # general thread exception.
                 logger.error('Consumer exception %s' % e)
-                #TODO: continue trying/trap exceptions?
+                # TODO: continue trying/trap exceptions?
                 raise
-        self.cleanUp()
 
 
 class QueueImportBuffer(ImportBuffer):
     queue = None
     def __init__(self, *args, **kwargs):
         self.queue = queue.Queue()
-        #self.logger = getLogger(__class__.__name__)
+        # self.logger = getLogger(__class__.__name__)
         super(QueueImportBuffer, self).__init__(*args, **kwargs)
 
-    #TODO: break up ImportBuffer for ST/MT/MP
-    #NOTE: make sure to add a queue finished dump
+    # TODO: break up ImportBuffer for ST/MT/MP
+    # NOTE: make sure to add a queue finished dump
 
 
 class MTQueueImportBuffer(QueueImportBuffer):
@@ -223,7 +225,7 @@ class MPQueueImportBuffer(QueueImportBuffer):
         comitted to the database will be detected by another process.
         Obviously.
     '''
-    #TODO: move stats into parent class.  Standard stat framework needed.
+    # TODO: move stats into parent class.  Standard stat framework needed.
     stats = BufferStats()
     consumer = None
     response_error = None
@@ -278,8 +280,8 @@ class MPQueueImportBuffer(QueueImportBuffer):
         super(MPQueueImportBuffer, self).__init__(*args, **kwargs)
 
         self.manager = multiprocessing.Manager()
-        #override default list
-        #self.results_list = self.manager.list()
+        # override default list
+        # self.results_list = self.manager.list()
 
         self.consumer = kwargs.pop('consumer', None)
         if self.consumer is None:
@@ -296,12 +298,12 @@ class MPQueueImportBuffer(QueueImportBuffer):
         try:
             self.queue.put(item)
         except AssertionError:
-            #queue has been closed, remake it (let the other GC)
+            # queue has been closed, remake it (let the other GC)
             logger.warn('Queue closed early.')
             self.queue = BufferQueue(ctx=multiprocessing.get_context())
             self.queue.put(item)
         except BrokenPipeError:
-            #workaround for pipe issue
+            # workaround for pipe issue
             logger.warn('Broken pipe, Forcing creation of new queue.')
             # all reading procesess should suicide and new ones spawned.
             self.queue = BufferQueue(ctx=multiprocessing.get_context())
@@ -310,9 +312,9 @@ class MPQueueImportBuffer(QueueImportBuffer):
 #                 del BaseProxy._address_to_local[address][0].connection
             self.queue.put(item)
         except Exception as e:
-            #general thread exception.
+            # general thread exception.
             logger.error('Buffer queue exception %s' % e)
-            #TODO: continue trying/trap exceptions?
+            # TODO: continue trying/trap exceptions?
             raise
         # check for finished consumers and clean them up before we check to see
         # if we need to add additional consumers.
@@ -321,7 +323,7 @@ class MPQueueImportBuffer(QueueImportBuffer):
                 logger.debug('Child dead, releasing.')
                 self.running.remove(csmr)
 
-        #see if we should start a consumer...
+        # see if we should start a consumer...
         # TODO: add min/max processes (default and override)
         if not self.running:
             logger.debug('Spawning consumer.')
@@ -344,39 +346,50 @@ class MPQueueImportBuffer(QueueImportBuffer):
         '''
         # close the queue and wait until it is consumed
         if block:
-            self.queue.close()
-            self.queue.join_thread()
+#             self.queue.close()
+#             logger.debug("Closing queue and waiting for consumer")
+#             self.queue.join_thread()
             # make sure the consumers are done consuming the queue
             for csmr in self.running:
-                #get everything on the results queue right now.
+                # get everything on the results queue right now.
                 try:
-                    while csmr.is_alive():
-                        self.results_list.append(
-                            self.results_queue.get(timeout=0.5))
+                    self.queue.join()
+                    logger.debug("Joining on consumer")
+                    while True:
+                        logger.debug("results_queue length: %s" % self.results_queue.qsize())
+                        itm = self.results_queue.get(timeout=0.5)
+                        logger.debug("finished %s" % str(itm)[:50])
+                        self.results_list.append(itm)
                         self.results_queue.task_done()
                 except queue.Empty:
                     if csmr.is_alive():
                         logger.warn('Result queue empty but consumer alive.')
-                        logger.warn('joining %s.' % csmr.name)
-                        csmr.join()
-            #TODO: implement this
-#             while not self.result_queue.empty():
+                        logger.warn('cleanUp %s.' % csmr.name)
+                        csmr.cleanUp()
+            # TODO: implement this
+#             while not self.results_queue.empty():
 #                 try:
-#                     self.results_list.append(self.result_queue.get(timeout=0.1))
+#                     self.results_list.append(self.results_queue.get(timeout=0.1))
+#                     self.results_queue.task_done()
 #                 except queue.Empty:
 #                     break
             del self.running[:]
             if self.callback:
                 return self.callback(self.results_list)
         else:
-            #read results immediately available.
+            # read results immediately available.
+            
             try:
                 while True:
-                    self.results_list.append(self.results_queue.get_nowait())
+                    logger.debug("self.results_queue.qsize(): %s" % self.results_queue.qsize())
+                    self.results_list.append(self.results_queue.get(False, timeout=5))
                     self.results_queue.task_done()
+                    logger.debug("task done")
             except queue.Empty:
-                #got everything on the queue so far
+                # got everything on the queue so far
+                logger.debug("Queue empty")
                 pass
+        logger.debug("len(self.results_list): %s" % len(self.results_list))
         return self.results_list
 
 
@@ -420,15 +433,15 @@ class SMPActionPool(object):
 class ActionPool(object):
     '''A semaphore-bound class to keep track of request-bound action objects in
     order to prevent stupid-level request spawning.'''
-    running_actions       = None
+    running_actions = None
     available_smp_actions = None
-    available_actions     = None
-    lock                  = None
-    config                = None
-    use_cache             = False
-    import_buffer_proto   = None
-    consumer_proto        = None
-    def __init__(self, config, buffer_prototype = None, consumer_prototype =
+    available_actions = None
+    lock = None
+    config = None
+    use_cache = False
+    import_buffer_proto = None
+    consumer_proto = None
+    def __init__(self, config, buffer_prototype=None, consumer_prototype=
             None, use_cache=False, max_spawn=5):
         """__init__
 
@@ -445,14 +458,14 @@ class ActionPool(object):
         flag to enable/disable the cache specific to this pool.
         """
         super(ActionPool, self).__init__()
-        self.config              = config
-        self.use_cache           = use_cache
-        self.lock                = threading.Lock()
-        self.spawnlimit          = threading.Semaphore(max_spawn)
-        self.running_actions     = {}
-        self.available_actions   = queue.Queue()
+        self.config = config
+        self.use_cache = use_cache
+        self.lock = threading.Lock()
+        self.spawnlimit = threading.Semaphore(max_spawn)
+        self.running_actions = {}
+        self.available_actions = queue.Queue()
         self.import_buffer_proto = buffer_prototype
-        self.consumer_proto      = consumer_prototype
+        self.consumer_proto = consumer_prototype
 
     def get_action(self):
         """get_action - synonymn for getAction"""
@@ -500,12 +513,12 @@ class ActionPool(object):
             except queue.Empty:
                 actn = None
                 if self.use_cache:
-                    actn = proto(cache_connection =
+                    actn = proto(cache_connection=
                             qcache.APICacheInstance(self.config))
                 else:
                     import_buffer_proto = self.import_buffer_proto if \
                         self.import_buffer_proto is not None else MPQueueImportBuffer
-                    actn = proto(connection = connector.QGConnector(
+                    actn = proto(connection=connector.QGConnector(
                         self.config.get_auth(),
                         hostname=self.config.get_hostname(),
                         proxies=self.config.proxies,
@@ -528,9 +541,9 @@ class ActionPool(object):
 
 class ThreadedAction(threading.Thread):
     '''Base class for threaded QGActions'''
-    pool      = None
-    source    = None
-    data      = None
+    pool = None
+    source = None
+    data = None
     nice_time = None
     def __init__(self, action_pool, source, data={}, name=None,
             use_cache=False, nice_time=120):
@@ -551,13 +564,13 @@ class ThreadedAction(threading.Thread):
         :param nice_time:
         Set the yield time between repeat action calls.
         """
-        self.pool      = action_pool
-        self.source    = source
-        self.data      = data
+        self.pool = action_pool
+        self.source = source
+        self.data = data
         self.use_cache = use_cache
         self.nice_time = nice_time
         if name is None:
-            name = source.join(('|%s=%s' % (n,v) for n,v in data.items()))
+            name = source.join(('|%s=%s' % (n, v) for n, v in data.items()))
         self.nice_time = nice_time
         super(ThreadedAction, self).__init__(name=name)
 
@@ -610,7 +623,7 @@ class MapReportRunner(ThreadedAction):
     then monitors the status of the report until finished, after which it
     processes the report..
     '''
-    __mapr = None # minimal map result required for a report
+    __mapr = None  # minimal map result required for a report
     __rpt = None
     # personal thread instance of a QGActions object
     def __init__(self, mapr, *args, **kwargs):
@@ -624,7 +637,7 @@ class MapReportRunner(ThreadedAction):
         pass to parent
         """
         self.__mapr = mapr
-        super(MapReportRunner, self).__init__(*args, **kwargs) #pass to parent
+        super(MapReportRunner, self).__init__(*args, **kwargs)  # pass to parent
 
     def singleRequestResponse(self, action):
         '''Begin consuming map references and generating reports on them (also
@@ -633,7 +646,7 @@ class MapReportRunner(ThreadedAction):
         if not self.__mapr.report_id:
             response = action.startMapReportOnMap(self.__mapr)
             if response:
-                #deal with this if we have to?
+                # deal with this if we have to?
                 (mapr, mapid) = response
         else:
             # check to see if the report is finished...
@@ -665,10 +678,10 @@ class RequestDispatchMonitorServer(object):
     starting the actual download (for time/size metrics and load management
     reasons later on).'''
 
-    monitors     = []
-    pool_sema    = None
-    kill_timeout = 5 # wait 5 seconds for threads to suicide
-    max_sockets  = 10 # be conservative at first...
+    monitors = []
+    pool_sema = None
+    kill_timeout = 5  # wait 5 seconds for threads to suicide
+    max_sockets = 10  # be conservative at first...
 
     def __init__(self, *args, **kwargs):
         ''' Simple interface to threading out multiple QualysStatusMonitor
@@ -809,13 +822,13 @@ class QGSMPActions(QGActions):
 
         block = kwargs.get('block', True)
         callback = kwargs.pop('completion_callback', None)
-        #TODO: consider passing in an import_buffer for thread management reuse
-        #of this object
-        #TODO: consider replacing this requirement
+        # TODO: consider passing in an import_buffer for thread management reuse
+        # of this object
+        # TODO: consider replacing this requirement
         if not block and not callback:
-            logger.info('No callback on nonblocking call.  No smp results ' +\
+            logger.info('No callback on nonblocking call.  No smp results ' + \
                 'will be returned by this function.  Consumer only.')
-        #select the response file-like object
+        # select the response file-like object
         response = None
         if isinstance(source, str):
             response = self.stream_request(source, **kwargs)
@@ -834,6 +847,7 @@ class QGSMPActions(QGActions):
             else:
                 self.import_buffer = self.buffer_prototype(callback=callback,
                         consumer=consumer)
+        del self.import_buffer.results_list[:]
         rstub = None
         if 'report' in kwargs:
             rstub = kwargs.get('report')
@@ -842,7 +856,7 @@ class QGSMPActions(QGActions):
                 ' and subclasses can be passed to this function as reports.')
 
         context = etree.iterparse(response, events=('end',))
-        #optional default elem/obj mapping override
+        # optional default elem/obj mapping override
         local_elem_map = kwargs.get('obj_elem_map', queue_elem_map)
         for event, elem in context:
             # Use QName to avoid specifying or stripping the namespace, which we don't need
@@ -851,17 +865,21 @@ class QGSMPActions(QGActions):
                 break
             stag = etree.QName(elem.tag).localname.upper()
             if stag in local_elem_map:
-                logger.debug('Adding type "%s" to queue.' %
-                        (local_elem_map[stag]))
+#                 logger.debug('Adding type "%s" to queue.' % 
+#                         (local_elem_map[stag]))
+                item = local_elem_map[stag](elem=elem,
+                    report_stub=rstub)
+                logger.debug("Adding %s to queue" % str(item)[:50])
                 self.import_buffer.queueAdd(local_elem_map[stag](elem=elem,
                     report_stub=rstub))
             elif stag in obj_elem_map:
-                logger.debug('Adding type "%s" to return list.' %
+                logger.debug('Adding type "%s" to return list.' % 
                         (obj_elem_map[stag]))
-                self.import_buffer.add(obj_elem_map[stag](elem=elem,
+                self.import_buffer.queueAdd(obj_elem_map[stag](elem=elem,
                     report_stub=rstub))
                 # elem.clear() #don't fill up a dom we don't need.
-        results = self.import_buffer.finish(block=block)
+        results = self.import_buffer.finish(block=True)
+        logger.debug("Checking results")
         self.checkResults(results)
 
         # special case: report encapsulization...
@@ -924,10 +942,10 @@ class QGSMPActions(QGActions):
         maps = self.listMaps()
         # filter the list to only include those we want
         if include_pattern in kwargs:
-            #TODO: compile regex and filter matches
+            # TODO: compile regex and filter matches
             pass
         if exclude_pattern in kwargs:
-            #TODO: compile regex and filter matches
+            # TODO: compile regex and filter matches
             pass
 
         if 'map_refs' in kwargs:

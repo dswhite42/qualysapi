@@ -849,12 +849,14 @@ parser.')
             prev_id_min = id_min
             id_min = None
             for itm in reversed(prev_result):
+                logger.debug(type(itm))
                 if isinstance(itm, AssetWarning):
                     id_min_tmp = itm.getQueryDict().get('id_min', None)
                     try:
                         id_min_tmp = int(id_min_tmp)
                         if id_min_tmp > prev_id_min:
                             id_min = id_min_tmp
+                            logger.debug("ID_MIN: %s" % id_min)
                             break
                     except:
                         break
