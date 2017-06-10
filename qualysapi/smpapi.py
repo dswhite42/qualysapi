@@ -164,7 +164,12 @@ class BufferConsumer(multiprocessing.Process):
         while True:
             try:
                 logger.debug("%s: queue size:%s" % (self.name, self.queue.qsize()))
-                item = self.queue.get(timeout=10)
+                item = self.queue.get()
+                if item is None:
+                    logger.debug("%s: Got poison pill, ending" % self.name)
+                    self.queue.task_done()
+                    self.alive = False
+                    return
                 # the base class just logs this stuff
                 logger.debug("%s: processing %s" % (self.name, str(item)[:50]))
                 rval = self.singleItemHandler(item)
@@ -172,10 +177,10 @@ class BufferConsumer(multiprocessing.Process):
                     self.results_queue.put(rval)
                     self.queue.task_done()
                     logger.debug("%s: processed %s" % (self.name, str(rval)[:50]))
-            except queue.Empty:
-                logger.debug('%s: Queue timed out after 10 seconds.' % self.name)
-                self.alive = False
-                return
+#             except queue.Empty:
+#                 logger.debug('%s: Queue timed out after 10 seconds.' % self.name)
+#                 self.alive = False
+#                 return
                 # self.queue.close()
                 # self.terminate()
             except EOFError:
@@ -888,6 +893,8 @@ class QGSMPActions(QGActions):
                 self.import_buffer.queueAdd(obj_elem_map[stag](elem=elem,
                     report_stub=rstub))
                 # elem.clear() #don't fill up a dom we don't need.
+        for csmr in self.import_buffer.running:
+            self.import_buffer.queueAdd(None)
         results = self.import_buffer.finish(block=True)
         logger.debug("Checking results")
         self.checkResults(results)
