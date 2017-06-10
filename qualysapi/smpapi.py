@@ -375,10 +375,7 @@ class MPQueueImportBuffer(QueueImportBuffer):
                         self.results_list.append(itm)
                         self.results_queue.task_done()
                 except queue.Empty:
-                    if csmr.is_alive():
-                        logger.warn('Result queue empty but consumer alive.')
-                        logger.warn('cleanUp %s.' % csmr.name)
-                        csmr.cleanUp()
+                    break
             # TODO: implement this
 #             while not self.results_queue.empty():
 #                 try:
