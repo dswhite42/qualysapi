@@ -849,7 +849,6 @@ parser.')
             prev_id_min = id_min
             id_min = None
             for itm in reversed(prev_result):
-                logger.debug(type(itm))
                 if isinstance(itm, AssetWarning):
                     id_min_tmp = itm.getQueryDict().get('id_min', None)
                     try:

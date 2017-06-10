@@ -101,6 +101,7 @@ class BufferConsumer(multiprocessing.Process):
     response_err = None  # : event to communicate with queue.  Optional.
     # logger       = None
     results_queue = None
+    alive = None
     def __init__(self, **kwargs):
         '''
         initialize this consumer with a bite_size to consume from the buffer.
@@ -121,6 +122,7 @@ class BufferConsumer(multiprocessing.Process):
         self.results_queue = kwargs.pop('results_queue', None)
         self.response_error = kwargs.pop('response_error', None)
         self.setUp()
+        self.alive = True
         # work set the process name to the consumer.
         if not 'name' in kwargs:
             kwargs['name'] = __class__.__name__
@@ -161,28 +163,33 @@ class BufferConsumer(multiprocessing.Process):
         '''
         while True:
             try:
-                item = self.queue.get(timeout=10)
+                logger.debug("%s: queue size:%s" % (self.name, self.queue.qsize()))
+                item = self.queue.get(timeout=1)
                 # the base class just logs this stuff
-                logger.debug("processing %s" % str(item)[:50])
+                logger.debug("%s: processing %s" % (self.name, str(item)[:50]))
                 rval = self.singleItemHandler(item)
                 if rval and self.results_queue:
                     self.results_queue.put(rval)
                     self.queue.task_done()
-                    logger.debug("processed %s" % str(rval)[:50])
+                    logger.debug("%s: processed %s" % (self.name, str(rval)[:50]))
             except queue.Empty:
-                logger.debug('Queue timed out after 10 seconds.')
-                self.queue.close()
-                break
+                logger.debug('%s: Queue timed out after 1 seconds.' % self.name)
+                self.alive = False
+                return
+                # self.queue.close()
+                # self.terminate()
             except EOFError:
                 info(
                     '%s has finished consuming queue.' % (__class__.__name__))
+                self.alive = False
                 break
             except Exception as e:
                 # general thread exception.
-                logger.error('Consumer exception %s' % e)
+                logger.error('%s exception: %s' % (self.name, e))
+                self.alive = False
                 # TODO: continue trying/trap exceptions?
                 raise
-
+        return
 
 class QueueImportBuffer(ImportBuffer):
     queue = None
@@ -238,6 +245,7 @@ class MPQueueImportBuffer(QueueImportBuffer):
 
     callback = None
     results_queue = None
+    spawned_counter = 0
 
 
     def __init__(self, *args, **kwargs):
@@ -318,21 +326,26 @@ class MPQueueImportBuffer(QueueImportBuffer):
             raise
         # check for finished consumers and clean them up before we check to see
         # if we need to add additional consumers.
+        alive_csmr_count = 0
         for csmr in self.running:
-            if not csmr.is_alive():
-                logger.debug('Child dead, releasing.')
+            if not csmr.alive:
+                logger.debug('Child %s dead, releasing.' % csmr.name)
                 self.running.remove(csmr)
+            else:
+                alive_csmr_count = alive_csmr_count + 1
 
         # see if we should start a consumer...
         # TODO: add min/max processes (default and override)
-        if not self.running:
-            logger.debug('Spawning consumer.')
+        if alive_csmr_count < self.max_consumers:
             new_consumer = self.consumer(
                     queue=self.queue,
                     results_queue=self.results_queue,
-                    response_error=self.response_error)
+                    response_error=self.response_error,
+                    name=('Consumer-' + str(self.spawned_counter)))
+            logger.debug('Spawning consumer (%s).' % new_consumer.name)
             new_consumer.start()
             self.running.append(new_consumer)
+            self.spawned_counter = self.spawned_counter + 1
 
     def setCallback(self, callback):
         '''set or replace a callback in an existing buffer instance.'''
@@ -350,11 +363,11 @@ class MPQueueImportBuffer(QueueImportBuffer):
 #             logger.debug("Closing queue and waiting for consumer")
 #             self.queue.join_thread()
             # make sure the consumers are done consuming the queue
+            logger.debug("Joining on consumer")
+            self.queue.join()
             for csmr in self.running:
                 # get everything on the results queue right now.
                 try:
-                    self.queue.join()
-                    logger.debug("Joining on consumer")
                     while True:
                         logger.debug("results_queue length: %s" % self.results_queue.qsize())
                         itm = self.results_queue.get(timeout=0.5)
@@ -869,7 +882,7 @@ class QGSMPActions(QGActions):
 #                         (local_elem_map[stag]))
                 item = local_elem_map[stag](elem=elem,
                     report_stub=rstub)
-                logger.debug("Adding %s to queue" % str(item)[:50])
+                # logger.debug("Adding %s to queue" % str(item)[:50])
                 self.import_buffer.queueAdd(local_elem_map[stag](elem=elem,
                     report_stub=rstub))
             elif stag in obj_elem_map:
