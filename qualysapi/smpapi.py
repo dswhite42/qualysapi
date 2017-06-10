@@ -164,7 +164,7 @@ class BufferConsumer(multiprocessing.Process):
         while True:
             try:
                 logger.debug("%s: queue size:%s" % (self.name, self.queue.qsize()))
-                item = self.queue.get(timeout=1)
+                item = self.queue.get(timeout=10)
                 # the base class just logs this stuff
                 logger.debug("%s: processing %s" % (self.name, str(item)[:50]))
                 rval = self.singleItemHandler(item)
@@ -173,7 +173,7 @@ class BufferConsumer(multiprocessing.Process):
                     self.queue.task_done()
                     logger.debug("%s: processed %s" % (self.name, str(rval)[:50]))
             except queue.Empty:
-                logger.debug('%s: Queue timed out after 1 seconds.' % self.name)
+                logger.debug('%s: Queue timed out after 10 seconds.' % self.name)
                 self.alive = False
                 return
                 # self.queue.close()
