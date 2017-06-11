@@ -171,12 +171,14 @@ class BufferConsumer(multiprocessing.Process):
                     self.alive = False
                     return
                 # the base class just logs this stuff
-                logger.debug("%s: processing %s" % (self.name, str(item)[:50]))
+                if isinstance(item, Host):
+                    logger.debug("%s: processing %s" % (self.name, str(item.id)))
                 rval = self.singleItemHandler(item)
                 if rval and self.results_queue:
                     self.results_queue.put(rval)
                     self.queue.task_done()
-                    logger.debug("%s: processed %s" % (self.name, str(rval)[:50]))
+                    if isinstance(rval, Host):
+                        logger.debug("%s: processed %s" % (self.name, str(rval.id)))
 #             except queue.Empty:
 #                 logger.debug('%s: Queue timed out after 10 seconds.' % self.name)
 #                 self.alive = False
@@ -376,7 +378,8 @@ class MPQueueImportBuffer(QueueImportBuffer):
                     while True:
                         logger.debug("results_queue length: %s" % self.results_queue.qsize())
                         itm = self.results_queue.get(timeout=0.5)
-                        logger.debug("finished %s" % str(itm)[:50])
+                        if isinstance(itm, Host):
+                            logger.debug("finished %s" % str(itm.id))
                         self.results_list.append(itm)
                         self.results_queue.task_done()
                 except queue.Empty:
@@ -870,7 +873,7 @@ class QGSMPActions(QGActions):
                 raise exceptions.QualysFrameworkException('Only Report objects'
                 ' and subclasses can be passed to this function as reports.')
 
-        context = etree.iterparse(response, events=('end',))
+        context = etree.iterparse(response, events=('end',), huge_tree=True)
         # optional default elem/obj mapping override
         local_elem_map = kwargs.get('obj_elem_map', queue_elem_map)
         for event, elem in context:
@@ -884,7 +887,7 @@ class QGSMPActions(QGActions):
 #                         (local_elem_map[stag]))
                 item = local_elem_map[stag](elem=elem,
                     report_stub=rstub)
-                # logger.debug("Adding %s to queue" % str(item)[:50])
+                # logger.debug("Adding %s to queue" % str(item.id))
                 self.import_buffer.queueAdd(local_elem_map[stag](elem=elem,
                     report_stub=rstub))
             elif stag in obj_elem_map:
