@@ -11,7 +11,7 @@ from multiprocessing.queues import Queue
 
 import threading
 from qualysapi import exceptions
-from qualysapi.util import qualys_datetime_to_python
+from qualysapi.util import qualys_datetime_to_python, unicode_str
 
 #debugger
 #import pudb
@@ -555,8 +555,8 @@ class Host(CacheableQualysObject):
             'DNS'              : ('dns',                                  str),
             'NETBIOS'          : ('netbios',                              str),
             'QG_HOSTID'        : ('qg_hostid',                            str),
-            'OPERATING_SYSTEM' : ('operating_system',                     str),
-            'OS'                 : ( 'operating_system',                  str),
+            'OPERATING_SYSTEM' : ('operating_system',                     unicode_str),
+            'OS'                 : ( 'operating_system',                  unicode_str),
             'OS_CPE'           : ('os_cpe',                               str),
             'IP_INTERFACES'    : ('interfaces',                ObjTypeList( IP,
                 xpath='IP')),
