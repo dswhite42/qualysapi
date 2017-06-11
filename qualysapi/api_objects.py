@@ -553,7 +553,7 @@ class Host(CacheableQualysObject):
             'TAGS'             : ('asset_tags', ObjTypeList(AssetTag,
                 xpath='TAG')),
             'DNS'              : ('dns',                                  str),
-            'NETBIOS'          : ('netbios',                              str),
+            'NETBIOS'          : ('netbios',                              unicode_str),
             'QG_HOSTID'        : ('qg_hostid',                            str),
             'OPERATING_SYSTEM' : ('operating_system',                     unicode_str),
             'OS'                 : ( 'operating_system',                  unicode_str),
