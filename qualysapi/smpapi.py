@@ -165,6 +165,7 @@ class BufferConsumer(multiprocessing.Process):
             try:
                 logger.debug("%s: queue size:%s" % (self.name, self.queue.qsize()))
                 item = self.queue.get()
+                logger.debug(item)
                 if item is None:
                     logger.debug("%s: Got poison pill, ending" % self.name)
                     self.queue.task_done()
@@ -371,7 +372,7 @@ class MPQueueImportBuffer(QueueImportBuffer):
 #             self.queue.join_thread()
             # make sure the consumers are done consuming the queue
             logger.debug("Joining on consumer")
-            self.queue.join()
+            #self.queue.join()
             for csmr in self.running:
                 # get everything on the results queue right now.
                 try:
@@ -883,8 +884,7 @@ class QGSMPActions(QGActions):
                 break
             stag = etree.QName(elem.tag).localname.upper()
             if stag in local_elem_map:
-#                 logger.debug('Adding type "%s" to queue.' % 
-#                         (local_elem_map[stag]))
+                logger.debug('Adding type "%s" to queue.' % (local_elem_map[stag]))
                 item = local_elem_map[stag](elem=elem,
                     report_stub=rstub)
                 # logger.debug("Adding %s to queue" % str(item.id))
