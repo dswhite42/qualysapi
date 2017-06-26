@@ -480,11 +480,19 @@ parser.')
         if 'file' in kwargs:
             sourcefile = open(kwargs.pop('file'), 'rb')
             result = self.parseResponse(source=sourcefile,
-                    consumer_prototype=consumer_prototype)
+                    consumer_prototype=consumer_prototype, 
+                    obj_elem_map = {
+                        'VULN'     : QKBVuln,
+                        'WARNING'  : AssetWarning,
+                    })
             sourcefile.close()
         else:
             result = self.parseResponse(source=call, data=params,
-                    consumer_prototype=consumer_prototype)
+                    consumer_prototype=consumer_prototype,
+                    obj_elem_map = {
+                        'VULN'     : QKBVuln,
+                        'WARNING'  : AssetWarning,
+                    })
         return self.finish()
 
 
@@ -709,7 +717,12 @@ parser.')
         # return 1 or None.  API doesn't allow multiple.  Also make sure it's a
         # report and not a SimpleReturn (which can happen)
         return self.parseResponse(source=call, data=params,
-                consumer_prototype=consumer_prototype, **kwargs)
+                consumer_prototype=consumer_prototype, 
+                obj_elem_map = {
+                                'ASSET_GROUP_LIST'  : AssetGroupList,   
+                                'WARNING'           : AssetWarning
+                                }, 
+                **kwargs)
 
     def hostListQuery(self, consumer_prototype=None, **kwargs):
         """hostListQuery
@@ -751,7 +764,12 @@ parser.')
         # return 1 or None.  API doesn't allow multiple.  Also make sure it's a
         # report and not a SimpleReturn (which can happen)
         return self.parseResponse(source=call, data=params,
-                consumer_prototype=consumer_prototype, **kwargs)
+                consumer_prototype=consumer_prototype,
+                obj_elem_map = {
+                    'HOST'     : Host,
+                    'WARNING'  : AssetWarning,
+                }, 
+                **kwargs)
 
     def hostDetectionQuery(self, consumer_prototype=None, **kwargs):
         """hostListQuery
@@ -803,7 +821,12 @@ parser.')
         # return 1 or None.  API doesn't allow multiple.  Also make sure it's a
         # report and not a SimpleReturn (which can happen)
         return self.parseResponse(source=call, data=params,
-                consumer_prototype=consumer_prototype, **kwargs)
+                consumer_prototype=consumer_prototype, 
+                obj_elem_map = {
+                    'HOST'     : Host,
+                    'WARNING'  : AssetWarning,
+                },
+                **kwargs)
 
     def assetIterativeWrapper(self, consumer_prototype=None, max_results=0,
             list_type_combine=None, exit=None, internal_call=None, **kwargs):

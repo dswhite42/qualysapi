@@ -876,6 +876,7 @@ class QGSMPActions(QGActions):
         context = etree.iterparse(response, events=('end',), huge_tree=True)
         # optional default elem/obj mapping override
         local_elem_map = kwargs.get('obj_elem_map', queue_elem_map)
+        logger.debug(local_elem_map)
         for event, elem in context:
             # Use QName to avoid specifying or stripping the namespace, which we don't need
             if exit.is_set():
@@ -888,11 +889,6 @@ class QGSMPActions(QGActions):
                     report_stub=rstub)
                 # logger.debug("Adding %s to queue" % str(item.id))
                 self.import_buffer.queueAdd(local_elem_map[stag](elem=elem,
-                    report_stub=rstub))
-            elif stag in obj_elem_map:
-                logger.debug('Adding type "%s" to return list.' % 
-                        (obj_elem_map[stag]))
-                self.import_buffer.queueAdd(obj_elem_map[stag](elem=elem,
                     report_stub=rstub))
                 # elem.clear() #don't fill up a dom we don't need.
         for csmr in self.import_buffer.running:
@@ -990,6 +986,8 @@ class QGSMPActions(QGActions):
             return []
 
 
+queue_elem_map = {}
+"""
 queue_elem_map = {
     'MAP_RESULT'        : MapResult,
     'VULN'              : QKBVuln,
@@ -997,3 +995,4 @@ queue_elem_map = {
     # this is disabled (for now)
     'HOST'              : Host,
 }
+"""
