@@ -166,10 +166,11 @@ class BufferConsumer(multiprocessing.Process):
                 logger.debug("%s: queue size:%s" % (self.name, self.queue.qsize()))
                 item = self.queue.get()
                 logger.debug(item)
-                if item is None:
+                if isinstance(item, PoisonPill):
                     logger.debug("%s: Got poison pill, ending" % self.name)
                     self.queue.task_done()
                     self.alive = False
+                    self.results_queue.put(PoisonPill())
                     return
                 # the base class just logs this stuff
                 if isinstance(item, Host):
@@ -374,16 +375,18 @@ class MPQueueImportBuffer(QueueImportBuffer):
             logger.debug("Joining on consumer")
             #self.queue.join()
                 # get everything on the results queue right now.
+            pill_counter = 0
             while True:
-                try:
-                    logger.debug("results_queue length: %s" % self.results_queue.qsize())
-                    itm = self.results_queue.get(timeout=0.5)
-                    if isinstance(itm, Host):
-                        logger.debug("finished %s" % str(itm.id))
-                    self.results_list.append(itm)
-                    self.results_queue.task_done()
-                except queue.Empty:
-                    break
+                logger.debug("results_queue length: %s" % self.results_queue.qsize())
+                itm = self.results_queue.get()
+                if isinstance(itm, PoisonPill):
+                    pill_counter = pill_counter + 1
+                    if pill_counter == self.max_consumers:
+                        break
+                if isinstance(itm, Host):
+                    logger.debug("finished %s" % str(itm.id))
+                self.results_list.append(itm)
+                self.results_queue.task_done()
             # TODO: implement this
 #             while not self.results_queue.empty():
 #                 try:
@@ -780,6 +783,10 @@ subclass of QualysStatusMonitor.' % type(proxy).__name__)
         if len(self.monitors):
             raise threading.ThreadError('Our children are misbehaving!')
 
+class PoisonPill(object):
+    
+    def __init__(self):
+        pass
 
 class QGSMPActions(QGActions):
     '''An extension to QGActions specifically to allow efficient SMP across
@@ -892,7 +899,7 @@ class QGSMPActions(QGActions):
                     report_stub=rstub))
                 # elem.clear() #don't fill up a dom we don't need.
         for csmr in self.import_buffer.running:
-            self.import_buffer.queueAdd(None)
+            self.import_buffer.queueAdd(PoisonPill())
         results = self.import_buffer.finish(block=True)
         logger.debug("Checking results")
         self.checkResults(results)
