@@ -373,14 +373,13 @@ class MPQueueImportBuffer(QueueImportBuffer):
             logger.debug("Joining on consumer")
             self.queue.join()
                 # get everything on the results queue right now.
-            try:
-                while True:
-                    logger.debug("results_queue length: %s" % self.results_queue.qsize())
-                    itm = self.results_queue.get(False, timeout=5)
-                    if isinstance(itm, Host):
-                        logger.debug("finished %s" % str(itm.id))
-                    self.results_list.append(itm)
-                    self.results_queue.task_done()
+            while not self.results_queue.empty():
+                logger.debug("results_queue length: %s" % self.results_queue.qsize())
+                itm = self.results_queue.get()
+                if isinstance(itm, Host):
+                    logger.debug("finished %s" % str(itm.id))
+                self.results_list.append(itm)
+                self.results_queue.task_done()
                 # TODO: implement this
     #             while not self.results_queue.empty():
     #                 try:
@@ -388,9 +387,6 @@ class MPQueueImportBuffer(QueueImportBuffer):
     #                     self.results_queue.task_done()
     #                 except queue.Empty:
     #                     break
-            except queue.Empty:
-                logger.debug("Queue empty")
-                pass
             del self.running[:]
             if self.callback:
                 return self.callback(self.results_list)
