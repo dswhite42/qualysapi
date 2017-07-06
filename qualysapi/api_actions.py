@@ -1,17 +1,14 @@
 from lxml import objectify, etree
 from qualysapi.api_objects import *
 from qualysapi.exceptions import *
-from qualysapi.api_methods import api_methods
 from qualysapi.util import date_param_format, qualys_datetime_to_python
-import logging
+
 logger = logging.getLogger(__name__)
 import pprint
-import json
 
-#from multiprocessing import pool, Event
+# from multiprocessing import pool, Event
 
-#from threading import Thread, Event
-import multiprocessing
+# from threading import Thread, Event
 import threading
 
 
@@ -27,16 +24,13 @@ import threading
 # multi-request parsing/consuming by a single calling program.
 
 
-import pudb
 class QGActions(object):
-
-    import_buffer    = None
+    import_buffer = None
     buffer_prototype = None
-    request          = None
-    stream_request   = None
+    request = None
+    stream_request = None
 
-    conn             = None
-
+    conn = None
 
     def __init__(self, *args, **kwargs):
         '''
@@ -65,7 +59,7 @@ api requst without specifying an API connection first.')
             self.stream_request = self.conn.stream_request
 
     def clone(self, proto=None):
-        #TODO: this is wrong...  fix it.
+        # TODO: this is wrong...  fix it.
         if proto == None:
             conf = self.conn.getConfig()
             return QGActions(
@@ -84,7 +78,6 @@ prototype is not an instance.')
                     proxies=conf.proxies,
                     max_retries=conf.max_retries)
 
-
     def parseResponse(self, **kwargs):
         """parseResponse
         inline parsing for requests.  Part of the overhaul.
@@ -95,7 +88,7 @@ prototype is not an instance.')
         if not source:
             raise QualysException('No source file or URL or raw stream found.')
 
-        #select the response file-like object
+        # select the response file-like object
         response = None
         if isinstance(source, str):
             response = self.stream_request(source, **kwargs)
@@ -112,10 +105,10 @@ prototype is not an instance.')
             rstub = kwargs.get('report')
             if not isinstance(rstub, Report):
                 raise exceptions.QualysFrameworkException('Only Report objects'
-                ' and subclasses can be passed to this function as reports.')
+                                                          ' and subclasses can be passed to this function as reports.')
 
         context = etree.iterparse(response, events=('end',))
-        #optional default elem/obj mapping override
+        # optional default elem/obj mapping override
         local_elem_map = kwargs.get('obj_elem_map', obj_elem_map)
         for event, elem in context:
             if exit.is_set():
@@ -125,10 +118,10 @@ prototype is not an instance.')
             stag = etree.QName(elem.tag).localname.upper()
             if stag in local_elem_map:
                 self.import_buffer.add(obj_elem_map[stag](elem=elem,
-                    report_stub=rstub))
+                                                          report_stub=rstub))
                 # elem.clear() #don't fill up a dom we don't need.
         results = self.import_buffer.finish(**kwargs)
-        #TODO: redress
+        # TODO: redress
         self.checkResults(results)
         # special case: report encapsulization...
         return results
@@ -142,8 +135,8 @@ parser.')
         elif not results:
             logger.debug('Empty result list from parser.')
         if isinstance(results, list) and \
-            len(results) > 0 and \
-            issubclass(type(results[0]),SimpleReturn):
+                        len(results) > 0 and \
+                issubclass(type(results[0]), SimpleReturn):
             api_response = results[0]
         elif issubclass(type(results), SimpleReturn):
             api_response = results
@@ -158,27 +151,28 @@ parser.')
         hostData = objectify.fromstring(self.request(call, data=parameters)).RESPONSE
         try:
             hostData = hostData.HOST_LIST.HOST
-            return Host(hostData.DNS, hostData.ID, hostData.IP, hostData.LAST_VULN_SCAN_DATETIME, hostData.NETBIOS, hostData.OS, hostData.TRACKING_METHOD)
+            return Host(hostData.DNS, hostData.ID, hostData.IP, hostData.LAST_VULN_SCAN_DATETIME, hostData.NETBIOS,
+                        hostData.OS, hostData.TRACKING_METHOD)
         except AttributeError:
             return Host("", "", host, "never", "", "", "")
 
     def getHostRange(self, start, end):
         call = '/api/2.0/fo/asset/host/'
-        parameters = {'action': 'list', 'ips': start+'-'+end}
+        parameters = {'action': 'list', 'ips': start + '-' + end}
         hostData = objectify.fromstring(self.request(call, data=parameters))
         hostArray = []
         for host in hostData.RESPONSE.HOST_LIST.HOST:
-            hostArray.append(Host(host.DNS, host.ID, host.IP, host.LAST_VULN_SCAN_DATETIME, host.NETBIOS, host.OS, host.TRACKING_METHOD))
+            hostArray.append(Host(host.DNS, host.ID, host.IP, host.LAST_VULN_SCAN_DATETIME, host.NETBIOS, host.OS,
+                                  host.TRACKING_METHOD))
 
         return hostArray
-
 
     def listAssetGroups(self, groupName=''):
         call = 'asset_group_list.php'
         if groupName == '':
             agData = objectify.fromstring(self.request(call))
         else:
-            agData = objectify.fromstring(self.request(call, 'title='+groupName)).RESPONSE
+            agData = objectify.fromstring(self.request(call, 'title=' + groupName)).RESPONSE
 
         groupsArray = []
         scanipsArray = []
@@ -189,24 +183,25 @@ parser.')
                 for scanip in group.SCANIPS:
                     scanipsArray.append(scanip.IP)
             except AttributeError:
-                scanipsArray = [] # No IPs defined to scan.
+                scanipsArray = []  # No IPs defined to scan.
 
             try:
                 for scanner in group.SCANNER_APPLIANCES.SCANNER_APPLIANCE:
                     scannersArray.append(scanner.SCANNER_APPLIANCE_NAME)
             except AttributeError:
-                scannersArray = [] # No scanner appliances defined for this group.
+                scannersArray = []  # No scanner appliances defined for this group.
 
             try:
                 for dnsName in group.SCANDNS:
                     scandnsArray.append(dnsName.DNS)
             except AttributeError:
-                scandnsArray = [] # No DNS names assigned to group.
+                scandnsArray = []  # No DNS names assigned to group.
 
-            groupsArray.append(AssetGroup(group.BUSINESS_IMPACT, group.ID, group.LAST_UPDATE, scanipsArray, scandnsArray, scannersArray, group.TITLE))
+            groupsArray.append(
+                AssetGroup(group.BUSINESS_IMPACT, group.ID, group.LAST_UPDATE, scanipsArray, scandnsArray,
+                           scannersArray, group.TITLE))
 
         return groupsArray
-
 
     # single-thread/process specific 1-off query for starting a map report
     def startMapReportOnMap(self, mapr, **kwargs):
@@ -260,20 +255,20 @@ parser.')
         if 'template_id' in kwargs:
             template_id = kwargs.get('template_id', 0)
         elif 'template_name' in kwargs or kwargs.get('use_default_template',
-                False):
+                                                     False):
             # get the list of tempaltes
             template_list = self.listReportTemplates()
             use_default_template = kwargs.get('use_default_template', False)
             template_title = kwargs.get('template_title',
-                    self.conn.getConfig().getReportTemplate())
+                                        self.conn.getConfig().getReportTemplate())
             for template in template_list:
                 if use_default_template and \
-                    template.is_default and \
-                    template.report_type == 'Map':
+                        template.is_default and \
+                                template.report_type == 'Map':
                     template_id = template.template_id
                 elif template.title == template_title:
                     tempalte_id = template.template_id
-                if not template_id: # false if not 0
+                if not template_id:  # false if not 0
                     break
         else:
             raise exceptions.QualysFrameworkException('You need one of a \
@@ -287,7 +282,7 @@ parser.')
             comp_mapr_name = None
             if comp_mapr:
                 comp_mapr_name = comp_mapr.name if not isinstance(comp_mapr, \
-                        str) else str(comp_mapr)
+                                                                  str) else str(comp_mapr)
 
             report_title = '%s - api generated' % (mapr_name)
             if comp_mapr_name:
@@ -297,12 +292,12 @@ parser.')
 
         call = '/api/2.0/fo/report/'
         params = {
-            'action'      : 'launch',
-            'template_id' : template_id,
-            'report_title' : report_title,
-            'output_format' : output_format,
-            'report_type' : 'Map',
-            'domain' : kwargs.pop('domain', 'none'),
+            'action': 'launch',
+            'template_id': template_id,
+            'report_title': report_title,
+            'output_format': output_format,
+            'report_type': 'Map',
+            'domain': kwargs.pop('domain', 'none'),
         }
 
         if 'hide_header' in kwargs:
@@ -311,7 +306,7 @@ parser.')
                 params['hide_header'] = kwargs.get('hide_header')
             else:
                 params['hide_header'] = '0' if not kwargs.get('hide_header') \
-                        else '1'
+                    else '1'
 
         if 'ip_restriction' in kwargs:
             if isinstance(kwargs.get('ip_restriction'), str):
@@ -330,8 +325,8 @@ parser.')
 
         if comp_mapr:
             params['report_refs'] = '%s,%s' % (params['report_refs'], \
-                    comp_mapr.ref if not isinstance(comp_mapr, str) else \
-                        str(comp_mapr))
+                                               comp_mapr.ref if not isinstance(comp_mapr, str) else \
+                                                   str(comp_mapr))
 
         response = self.parseResponse(source=call, data=params)
         if not len(response) and isinstance(response[0], SimpleReturn):
@@ -343,10 +338,10 @@ parser.')
                 return (mapr, report_id)
         # if we get here, something is wrong.
         raise exceptions.QualysFrameworkException('Unexpected API '
-            'response.\n%s' % (pprint.pformat(response)))
+                                                  'response.\n%s' % (pprint.pformat(response)))
 
     def fetchReport(self, rid=None, report=None, consumer_prototype=None,
-            **kwargs):
+                    **kwargs):
         '''
         Uses the cache to quickly look up the report associated with a specific
         map ref.
@@ -371,17 +366,17 @@ parser.')
 
         call = '/api/2.0/fo/report/'
         params = {
-            'action'        : 'fetch',
-            'id'            : rid
+            'action': 'fetch',
+            'id': rid
         }
         # return 1 or None.  API doesn't allow multiple.  Also make sure it's a
         # report and not a SimpleReturn (which can happen)
         results = self.parseResponse(source=call, data=params, report=report,
-                consumer_prototype=consumer_prototype)
+                                     consumer_prototype=consumer_prototype)
         for result in results:
             if isinstance(result, Report):
                 return result
-        #None result
+                # None result
 
     def queryQKB(self, consumer_prototype=None, **kwargs):
         '''
@@ -432,28 +427,28 @@ parser.')
         objects or None.
         '''
         optional_params = [
-            ('action',                         'list'),
-            ('echo_request',                   '0' ), #: optional but default
-            ('details',                         None ), #: {Basic|All| None }
-            ('ids',                             None ), #: {value}
-            ('id_min',                          None ), #: {value}
-            ('id_max',                          None ), #: {value}
-            ('is_patchable',                    None ), #: {0|1}
-            ('last_modified_after',             None ), #: {date}
-            ('last_modified_before',            None ), #: {date}
-            ('last_modified_by_user_after',     None ), #: {date}
-            ('last_modified_by_user_before',    None ), #: {date}
-            ('last_modified_by_service_after',  None ), #: {date}
-            ('last_modified_by_service_before', None ), #: {date}
-            ('published_after',                 None ), #: {date}
-            ('published_before',                None ), #: {date}
-            ('discovery_method',                None ), #: {value}
-            ('discovery_auth_types',            None ), #: {value}
-            ('show_pci_reasons',                None ), #: {0|1}
+            ('action', 'list'),
+            ('echo_request', '0'),  #: optional but default
+            ('details', None),  #: {Basic|All| None }
+            ('ids', None),  #: {value}
+            ('id_min', None),  #: {value}
+            ('id_max', None),  #: {value}
+            ('is_patchable', None),  #: {0|1}
+            ('last_modified_after', None),  #: {date}
+            ('last_modified_before', None),  #: {date}
+            ('last_modified_by_user_after', None),  #: {date}
+            ('last_modified_by_user_before', None),  #: {date}
+            ('last_modified_by_service_after', None),  #: {date}
+            ('last_modified_by_service_before', None),  #: {date}
+            ('published_after', None),  #: {date}
+            ('published_before', None),  #: {date}
+            ('discovery_method', None),  #: {value}
+            ('discovery_auth_types', None),  #: {value}
+            ('show_pci_reasons', None),  #: {0|1}
         ]
         call = '/api/2.0/fo/knowledge_base/vuln/'
         params = {
-            key:kwargs.get(key, default) for (key, default) in
+            key: kwargs.get(key, default) for (key, default) in
             optional_params if kwargs.get(key, default) is not None
         }
         # turn python Datetimes into qualys args...
@@ -480,21 +475,20 @@ parser.')
         if 'file' in kwargs:
             sourcefile = open(kwargs.pop('file'), 'rb')
             result = self.parseResponse(source=sourcefile,
-                    consumer_prototype=consumer_prototype, 
-                    obj_elem_map = {
-                        'VULN'     : QKBVuln,
-                        'WARNING'  : AssetWarning,
-                    })
+                                        consumer_prototype=consumer_prototype,
+                                        obj_elem_map={
+                                            'VULN': QKBVuln,
+                                            'WARNING': AssetWarning,
+                                        })
             sourcefile.close()
         else:
             result = self.parseResponse(source=call, data=params,
-                    consumer_prototype=consumer_prototype,
-                    obj_elem_map = {
-                        'VULN'     : QKBVuln,
-                        'WARNING'  : AssetWarning,
-                    })
+                                        consumer_prototype=consumer_prototype,
+                                        obj_elem_map={
+                                            'VULN': QKBVuln,
+                                            'WARNING': AssetWarning,
+                                        })
         return self.finish()
-
 
     def listReportTemplates(self):
         '''Load a list of report templates'''
@@ -522,7 +516,7 @@ parser.')
         '''
         call = '/api/2.0/fo/report/'
         parameters = {
-            'action' : 'list',
+            'action': 'list',
         }
         for param in ('id', 'state', 'user_login', 'expires_before_datetime'):
             if param in kwargs:
@@ -535,7 +529,6 @@ parser.')
         else:
             return results
 
-
     def notScannedSince(self, days):
         call = '/api/2.0/fo/asset/host/'
         parameters = {'action': 'list', 'details': 'All'}
@@ -547,15 +540,15 @@ parser.')
             last_scan = qualys_datetime_to_python(last_scan)
             if (today - last_scan).days >= days:
                 hostArray.append(Host(host.DNS, host.ID, host.IP,
-                    host.LAST_VULN_SCAN_DATETIME, host.NETBIOS, host.OS,
-                    host.TRACKING_METHOD))
+                                      host.LAST_VULN_SCAN_DATETIME, host.NETBIOS, host.OS,
+                                      host.TRACKING_METHOD))
 
         return hostArray
 
     def addIP(self, ips, vmpc):
-        #'ips' parameter accepts comma-separated list of IP addresses.
-        #'vmpc' parameter accepts 'vm', 'pc', or 'both'. (Vulnerability
-        #Managment, Policy Compliance, or both)
+        # 'ips' parameter accepts comma-separated list of IP addresses.
+        # 'vmpc' parameter accepts 'vm', 'pc', or 'both'. (Vulnerability
+        # Managment, Policy Compliance, or both)
         call = '/api/2.0/fo/asset/ip/'
         enablevm = 1
         enablepc = 0
@@ -586,12 +579,12 @@ parser.')
         return self.parseResponse(source=call, data=data)
 
     def listScans(self, launched_after="", state="", target="", type="",
-            user_login=""):
-        #'launched_after' parameter accepts a date in the format: YYYY-MM-DD
-        #'state' parameter accepts "Running", "Paused", "Canceled", "Finished", "Error", "Queued", and "Loading".
-        #'title' parameter accepts a string
-        #'type' parameter accepts "On-Demand", and "Scheduled".
-        #'user_login' parameter accepts a user name (string)
+                  user_login=""):
+        # 'launched_after' parameter accepts a date in the format: YYYY-MM-DD
+        # 'state' parameter accepts "Running", "Paused", "Canceled", "Finished", "Error", "Queued", and "Loading".
+        # 'title' parameter accepts a string
+        # 'type' parameter accepts "On-Demand", and "Scheduled".
+        # 'user_login' parameter accepts a user name (string)
         call = '/api/2.0/fo/scan/'
         parameters = {'action': 'list', 'show_ags': 1, 'show_op': 1, 'show_status': 1}
         if launched_after != "":
@@ -609,7 +602,7 @@ parser.')
         if user_login != "":
             parameters['user_login'] = user_login
 
-        scanlist = objectify.fromstring(self.request(call, data = parameters))
+        scanlist = objectify.fromstring(self.request(call, data=parameters))
         scanArray = []
         for scan in scanlist.RESPONSE.SCAN_LIST.SCAN:
             try:
@@ -620,19 +613,19 @@ parser.')
                 agList = []
 
             scanArray.append(Scan(agList, scan.DURATION, scan.LAUNCH_DATETIME,
-                scan.OPTION_PROFILE.TITLE, scan.PROCESSED, scan.REF,
-                scan.STATUS, scan.TARGET, scan.TITLE, scan.TYPE,
-                scan.USER_LOGIN))
+                                  scan.OPTION_PROFILE.TITLE, scan.PROCESSED, scan.REF,
+                                  scan.STATUS, scan.TARGET, scan.TITLE, scan.TYPE,
+                                  scan.USER_LOGIN))
 
         return scanArray
 
     def launchScan(self, title, option_title, iscanner_name, asset_groups="",
-            ip=""):
+                   ip=""):
         # TODO: Add ability to scan by tag.
         call = '/api/2.0/fo/scan/'
         parameters = {'action': 'launch', 'scan_title': title, 'option_title':
-                option_title, 'iscanner_name': iscanner_name, 'ip': ip,
-                'asset_groups': asset_groups}
+            option_title, 'iscanner_name': iscanner_name, 'ip': ip,
+                      'asset_groups': asset_groups}
         if ip == "":
             parameters.pop("ip")
 
@@ -640,14 +633,14 @@ parser.')
             parameters.pop("asset_groups")
 
         scan_ref = objectify.fromstring(self.request(call,
-            data=parameters)).RESPONSE.ITEM_LIST.ITEM[1].VALUE
+                                                     data=parameters)).RESPONSE.ITEM_LIST.ITEM[1].VALUE
 
         call = '/api/2.0/fo/scan/'
         parameters = {'action': 'list', 'scan_ref': scan_ref, 'show_status': 1,
-                'show_ags': 1, 'show_op': 1}
+                      'show_ags': 1, 'show_op': 1}
 
         scan = objectify.fromstring(self.request(call,
-            data=parameters)).RESPONSE.SCAN_LIST.SCAN
+                                                 data=parameters)).RESPONSE.SCAN_LIST.SCAN
         try:
             agList = []
             for ag in scan.ASSET_GROUP_TITLE_LIST.ASSET_GROUP_TITLE:
@@ -656,9 +649,9 @@ parser.')
             agList = []
 
         return Scan(agList, scan.DURATION, scan.LAUNCH_DATETIME,
-                scan.OPTION_PROFILE.TITLE, scan.PROCESSED, scan.REF,
-                scan.STATUS, scan.TARGET, scan.TITLE, scan.TYPE,
-                scan.USER_LOGIN)
+                    scan.OPTION_PROFILE.TITLE, scan.PROCESSED, scan.REF,
+                    scan.STATUS, scan.TARGET, scan.TITLE, scan.TYPE,
+                    scan.USER_LOGIN)
 
     def getConnectionConfig(self):
         return self.conn.getConfig()
@@ -697,32 +690,32 @@ parser.')
         """
         # p;ckle name/default pairs for kwargs
         optional_params = [
-            ('action',           'list'),
-            ('echo_request',     '0' ),
-            ('ids',              None ),
-            ('id_min',           None ),
-            ('id_max',           None ),
-            ('truncation_limit', None ), # default is 1000
-            ('network_ids',      None ),
-            ('unit_id',          None ),
-            ('user_id',          None ),
-            ('title',            None ),
-            ('show_attributes',  'TITLE' ), # see docs for list
+            ('action', 'list'),
+            ('echo_request', '0'),
+            ('ids', None),
+            ('id_min', None),
+            ('id_max', None),
+            ('truncation_limit', None),  # default is 1000
+            ('network_ids', None),
+            ('unit_id', None),
+            ('user_id', None),
+            ('title', None),
+            ('show_attributes', 'TITLE'),  # see docs for list
         ]
         call = '/api/2.0/fo/asset/group/'
         params = {
-            key:kwargs.get(key, default) for (key, default) in
+            key: kwargs.get(key, default) for (key, default) in
             optional_params if kwargs.get(key, default) is not None
         }
         # return 1 or None.  API doesn't allow multiple.  Also make sure it's a
         # report and not a SimpleReturn (which can happen)
         return self.parseResponse(source=call, data=params,
-                consumer_prototype=consumer_prototype, 
-                obj_elem_map = {
-                                'ASSET_GROUP_LIST'  : AssetGroupList,   
-                                'WARNING'           : AssetWarning
-                                }, 
-                **kwargs)
+                                  consumer_prototype=consumer_prototype,
+                                  obj_elem_map={
+                                      'ASSET_GROUP_LIST': AssetGroupList,
+                                      'WARNING': AssetWarning
+                                  },
+                                  **kwargs)
 
     def hostListQuery(self, consumer_prototype=None, **kwargs):
         """hostListQuery
@@ -732,44 +725,44 @@ parser.')
         """
         # p;ckle name/default pairs for kwargs
         optional_params = [
-            ('action',                   'list'),
-            ('truncation_limit',         None ), # default is 1000
-            ('details',                  'Basic'), # see docs for list
-            ('ips',                      None ),
-            ('ids',                      None ),
-            ('ag_ids',                   None ),
-            ('ag_titles',                None ),
-            ('id_min',                   None ),
-            ('id_max',                   None ),
-            ('network_ids',              None ),
-            ('no_vm_scan_since',         None ), #: {date}
-            ('no_compliance_scan_since', None ), #: {date}]
-            ('vm_scan_since',            None ), #: {date}
-            ('compliance_scan_since',    None ), #: {date}
-            ('compliance_enabled',       None ), #: {0|1}
-            ('os_pattern',               None ), #: {expression}
-            ('use_tags',                 None ), #: {0|1}
-            ('tag_set_by',               None ), #: {id|name}
-            ('tag_include_selector',     None ), #: {any|all}
-            ('tag_exclude_selector',     None ), #: {any|all}
-            ('tag_set_include',          None ), #: {value}
-            ('tag_set_exclude',          None ), #: {value}
-            ('show_tags',                None ), #: {0|1}
+            ('action', 'list'),
+            ('truncation_limit', None),  # default is 1000
+            ('details', 'Basic'),  # see docs for list
+            ('ips', None),
+            ('ids', None),
+            ('ag_ids', None),
+            ('ag_titles', None),
+            ('id_min', None),
+            ('id_max', None),
+            ('network_ids', None),
+            ('no_vm_scan_since', None),  #: {date}
+            ('no_compliance_scan_since', None),  #: {date}]
+            ('vm_scan_since', None),  #: {date}
+            ('compliance_scan_since', None),  #: {date}
+            ('compliance_enabled', None),  #: {0|1}
+            ('os_pattern', None),  #: {expression}
+            ('use_tags', None),  #: {0|1}
+            ('tag_set_by', None),  #: {id|name}
+            ('tag_include_selector', None),  #: {any|all}
+            ('tag_exclude_selector', None),  #: {any|all}
+            ('tag_set_include', None),  #: {value}
+            ('tag_set_exclude', None),  #: {value}
+            ('show_tags', None),  #: {0|1}
         ]
         call = '/api/2.0/fo/asset/host/'
         params = {
-            key:kwargs.get(key, default) for (key, default) in
+            key: kwargs.get(key, default) for (key, default) in
             optional_params if kwargs.get(key, default) is not None
         }
         # return 1 or None.  API doesn't allow multiple.  Also make sure it's a
         # report and not a SimpleReturn (which can happen)
         return self.parseResponse(source=call, data=params,
-                consumer_prototype=consumer_prototype,
-                obj_elem_map = {
-                    'HOST'     : Host,
-                    'WARNING'  : AssetWarning,
-                }, 
-                **kwargs)
+                                  consumer_prototype=consumer_prototype,
+                                  obj_elem_map={
+                                      'HOST': Host,
+                                      'WARNING': AssetWarning,
+                                  },
+                                  **kwargs)
 
     def hostDetectionQuery(self, consumer_prototype=None, **kwargs):
         """hostListQuery
@@ -779,57 +772,90 @@ parser.')
         """
         # p;ckle name/default pairs for kwargs
         optional_params = [
-            ('action',                            'list'),
-            ('echo_request',                      '0' ), #: optional but default
-            ('output_format',                     None ), #: {XML|CSV| CSV_NO_METADATA}
-            ('truncation_limit',                  None ), # default is 1000
-            ('ids',                               None ),
-            ('id_min',                            None ),
-            ('id_max',                            None ),
-            ('ips',                               None ),
-            ('ag_ids',                            None ),
-            ('ag_titles',                         None ),
-            ('network_ids',                       None ),
-            ('vm_scan_since',                     None ), #: {date}
-            ('no_vm_scan_since',                  None ), #: {date}
-            ('no_compliance_scan_since',          None ), #: {date}]
-            ('os_pattern',                        None ), #: {expression}
-            ('active_kernels_only',               None ), #: {0|1}
-            ('truncation_limit',                  None ), #: {value}
-            ('status',                            None ), #: {value} compliance_enabled={0|1}
-            ('qids',                              None ), #: {value}
-            ('severities',                        None ), #: {value}
-            ('show_igs',                          None ), #: {0|1}
-            ('include_search_list_titles',        None ), #: {value}
-            ('exclude_search_list_titles',        None ), #: {value}
-            ('include_search_list_ids',           None ), #: {value,value...}
-            ('exclude_search_list_ids',           None ), #: {value,value...}
-            ('use_tags',                          None ), #: {0|1} tag_set_by={id|name}
-            ('tag_include_selector',              None ), #: {any|all}
-            ('tag_exclude_selector',              None ), #: {any|all}
-            ('tag_set_include',                   None ), #: {value}
-            ('tag_set_exclude',                   None ), #: {value}
-            ('show_tags',                         None ), #: {0|1}
-            ('suppress_duplicated_data_from_csv', None ), #: {0|1}
-            ('max_days_since_last_vm_scan',       None ), #: {value}
+            ('action', 'list'),
+            ('echo_request', '0'),  #: optional but default
+            ('output_format', None),  #: {XML|CSV| CSV_NO_METADATA}
+            ('truncation_limit', None),  # default is 1000
+            ('ids', None),
+            ('id_min', None),
+            ('id_max', None),
+            ('ips', None),
+            ('ag_ids', None),
+            ('ag_titles', None),
+            ('network_ids', None),
+            ('vm_scan_since', None),  #: {date}
+            ('no_vm_scan_since', None),  #: {date}
+            ('no_compliance_scan_since', None),  #: {date}]
+            ('os_pattern', None),  #: {expression}
+            ('active_kernels_only', None),  #: {0|1}
+            ('truncation_limit', None),  #: {value}
+            ('status', None),  #: {value} compliance_enabled={0|1}
+            ('qids', None),  #: {value}
+            ('severities', None),  #: {value}
+            ('show_igs', None),  #: {0|1}
+            ('include_search_list_titles', None),  #: {value}
+            ('exclude_search_list_titles', None),  #: {value}
+            ('include_search_list_ids', None),  #: {value,value...}
+            ('exclude_search_list_ids', None),  #: {value,value...}
+            ('use_tags', None),  #: {0|1} tag_set_by={id|name}
+            ('tag_include_selector', None),  #: {any|all}
+            ('tag_exclude_selector', None),  #: {any|all}
+            ('tag_set_include', None),  #: {value}
+            ('tag_set_exclude', None),  #: {value}
+            ('show_tags', None),  #: {0|1}
+            ('suppress_duplicated_data_from_csv', None),  #: {0|1}
+            ('max_days_since_last_vm_scan', None),  #: {value}
         ]
         call = '/api/2.0/fo/asset/host/vm/detection/'
         params = {
-            key:kwargs.get(key, default) for (key, default) in
+            key: kwargs.get(key, default) for (key, default) in
             optional_params if kwargs.get(key, default) is not None
         }
         # return 1 or None.  API doesn't allow multiple.  Also make sure it's a
         # report and not a SimpleReturn (which can happen)
         return self.parseResponse(source=call, data=params,
-                consumer_prototype=consumer_prototype, 
-                obj_elem_map = {
-                    'HOST'     : Host,
-                    'WARNING'  : AssetWarning,
-                },
-                **kwargs)
+                                  consumer_prototype=consumer_prototype,
+                                  obj_elem_map={
+                                      'HOST': Host,
+                                      'WARNING': AssetWarning,
+                                  },
+                                  **kwargs)
 
+    def scannerApplianceQuery(self, consumer_prototype=None, **kwargs):
+        """scannerApplianceQuery
+
+                :param consumer_prototype: Optional multiprocess consumer
+                :param **kwargs: optional api parameters and keyword args
+                """
+        # p;ckle name/default pairs for kwargs
+        optional_params = [
+            ('action', 'list'),
+            ('echo_request', '0'),  #: optional but default
+            ('output_mode', 'brief'),  #: {XML|CSV| CSV_NO_METADATA}
+            ('scan_detail', None),  # default is 1000
+            ('include_cloud_info', None),
+            ('busy', None),
+            ('scan_ref', None),
+            ('name', None),
+            ('ids', None),
+            ('include_license_info', None),
+        ]
+        call = '/api/2.0/fo/appliance/'
+        params = {
+            key: kwargs.get(key, default) for (key, default) in
+            optional_params if kwargs.get(key, default) is not None
+        }
+        # return 1 or None.  API doesn't allow multiple.  Also make sure it's a
+        # report and not a SimpleReturn (which can happen)
+        return self.parseResponse(source=call, data=params,
+                                  consumer_prototype=consumer_prototype,
+                                  obj_elem_map={
+                                      'APPLIANCE': Appliance,
+                                      'WARNING': AssetWarning,
+                                  },
+                                  **kwargs)
     def assetIterativeWrapper(self, consumer_prototype=None, max_results=0,
-            list_type_combine=None, exit=None, internal_call=None, **kwargs):
+                              list_type_combine=None, exit=None, internal_call=None, **kwargs):
         """assetIterativeWrapper
 
         A common handler for the asset API to iterative many requests.  This
@@ -847,18 +873,18 @@ parser.')
             raise exceptions.QualysFrameworkException('Misuse of iterator.')
         if not exit:
             exit = threading.Event()
-        #1000 is the default so no need to pass on
+        # 1000 is the default so no need to pass on
         orig_truncation_limit = int(kwargs.get('truncation_limit', 1000))
         # ok so basically if there is a WARNING then check the CODE, parse the
         # URL and continue the loop.  Logging is preferred.
         id_min = kwargs.get('id_min', 1)
         itercount = 0
         while id_min and not exit.is_set():
-            #reset each iteration
+            # reset each iteration
             truncation_limit = orig_truncation_limit
-            itercount+=1
+            itercount += 1
             if max_results and orig_truncation_limit * itercount > max_results:
-                truncation_limit = max_results - (orig_truncation_limit*(itercount-1))
+                truncation_limit = max_results - (orig_truncation_limit * (itercount - 1))
                 if truncation_limit <= 0:
                     id_min = None
                     continue
@@ -866,8 +892,8 @@ parser.')
                     kwargs['truncation_limit'] = truncation_limit
             # update the id_min for this iteration
             kwargs['id_min'] = id_min
-            #make sure blocking is disabled
-            kwargs['block']=False
+            # make sure blocking is disabled
+            kwargs['block'] = False
             prev_result = internal_call(consumer_prototype, exit=exit, **kwargs)
             prev_id_min = id_min
             id_min = None
@@ -883,7 +909,6 @@ parser.')
                     except:
                         break
         return self.finish()
-
 
     def iterativeHostDetectionQuery(self, **kwargs):
         """iterativehostDetectionQuery
