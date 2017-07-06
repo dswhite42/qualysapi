@@ -176,9 +176,9 @@ class BufferConsumer(multiprocessing.Process):
                 if isinstance(item, Host):
                     logger.debug("%s: processing %s" % (self.name, str(item.id)))
                 rval = self.singleItemHandler(item)
+                self.queue.task_done()
                 if rval and self.results_queue:
                     self.results_queue.put(rval)
-                    self.queue.task_done()
                     if isinstance(rval, Host):
                         logger.debug("%s: processed %s" % (self.name, str(rval.id)))
 #             except queue.Empty:
@@ -373,7 +373,7 @@ class MPQueueImportBuffer(QueueImportBuffer):
 #             self.queue.join_thread()
             # make sure the consumers are done consuming the queue
             logger.debug("Joining on consumer")
-            #self.queue.join()
+            self.queue.join()
                 # get everything on the results queue right now.
             pill_counter = 0
             while True:
