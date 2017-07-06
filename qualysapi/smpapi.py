@@ -255,6 +255,7 @@ class MPQueueImportBuffer(QueueImportBuffer):
     callback = None
     results_queue = None
     spawned_counter = 0
+    pill_counter = 0
 
 
     def __init__(self, *args, **kwargs):
@@ -375,13 +376,13 @@ class MPQueueImportBuffer(QueueImportBuffer):
             logger.debug("Joining on consumer")
             self.queue.join()
                 # get everything on the results queue right now.
-            pill_counter = 0
             while True:
                 logger.debug("results_queue length: %s" % self.results_queue.qsize())
                 itm = self.results_queue.get()
                 if isinstance(itm, PoisonPill):
-                    pill_counter = pill_counter + 1
-                    if pill_counter == self.max_consumers:
+                    self.pill_counter = self.pill_counter + 1
+                    if self.pill_counter == self.max_consumers:
+                        self.pill_counter = 0
                         break
                 if isinstance(itm, Host):
                     logger.debug("finished %s" % str(itm.id))
