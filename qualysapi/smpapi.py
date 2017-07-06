@@ -373,7 +373,7 @@ class MPQueueImportBuffer(QueueImportBuffer):
             logger.debug("Joining on consumer")
             self.queue.join()
                 # get everything on the results queue right now.
-            while not self.results_queue.empty():
+            while self.results_queue.qsize() > 0:
                 logger.debug("results_queue length: %s" % self.results_queue.qsize())
                 itm = self.results_queue.get()
                 if isinstance(itm, Host):
