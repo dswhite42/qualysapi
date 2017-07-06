@@ -169,8 +169,6 @@ class BufferConsumer(multiprocessing.Process):
                 if isinstance(item, PoisonPill):
                     logger.debug("%s: Got poison pill, ending" % self.name)
                     self.queue.task_done()
-                    self.alive = False
-                    self.results_queue.put(PoisonPill())
                     return
                 # the base class just logs this stuff
                 if isinstance(item, Host):
@@ -255,7 +253,6 @@ class MPQueueImportBuffer(QueueImportBuffer):
     callback = None
     results_queue = None
     spawned_counter = 0
-    pill_counter = 0
 
 
     def __init__(self, *args, **kwargs):
@@ -376,25 +373,24 @@ class MPQueueImportBuffer(QueueImportBuffer):
             logger.debug("Joining on consumer")
             self.queue.join()
                 # get everything on the results queue right now.
-            while True:
-                logger.debug("results_queue length: %s" % self.results_queue.qsize())
-                itm = self.results_queue.get()
-                if isinstance(itm, PoisonPill):
-                    self.pill_counter = self.pill_counter + 1
-                    if self.pill_counter == self.max_consumers:
-                        self.pill_counter = 0
-                        break
-                if isinstance(itm, Host):
-                    logger.debug("finished %s" % str(itm.id))
-                self.results_list.append(itm)
-                self.results_queue.task_done()
-            # TODO: implement this
-#             while not self.results_queue.empty():
-#                 try:
-#                     self.results_list.append(self.results_queue.get(timeout=0.1))
-#                     self.results_queue.task_done()
-#                 except queue.Empty:
-#                     break
+            try:
+                while True:
+                    logger.debug("results_queue length: %s" % self.results_queue.qsize())
+                    itm = self.results_queue.get(False, timeout=5)
+                    if isinstance(itm, Host):
+                        logger.debug("finished %s" % str(itm.id))
+                    self.results_list.append(itm)
+                    self.results_queue.task_done()
+                # TODO: implement this
+    #             while not self.results_queue.empty():
+    #                 try:
+    #                     self.results_list.append(self.results_queue.get(timeout=0.1))
+    #                     self.results_queue.task_done()
+    #                 except queue.Empty:
+    #                     break
+            except queue.Empty:
+                logger.debug("Queue empty")
+                pass
             del self.running[:]
             if self.callback:
                 return self.callback(self.results_list)
