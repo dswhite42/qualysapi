@@ -556,7 +556,7 @@ class Host(CacheableQualysObject):
                                    qualys_datetime_to_python),
             'TRACKING_METHOD': ('tracking_method', str),
             'USER_DEF': ('user_def', UserDefs),
-            'ASSET_TAGS': ('asset_tags', ObjTypeList(str,
+            'ASSET_TAGS': ('asset_tags', ObjTypeList(unicode_str,
                                                      xpath='ASSET_TAG')),
             'TAGS': ('asset_tags', ObjTypeList(AssetTag,
                                                xpath='TAG')),
@@ -565,12 +565,12 @@ class Host(CacheableQualysObject):
             'QG_HOSTID': ('qg_hostid', unicode_str),
             'OPERATING_SYSTEM': ('operating_system', unicode_str),
             'OS': ('operating_system', unicode_str),
-            'OS_CPE': ('os_cpe', str),
+            'OS_CPE': ('os_cpe', unicode_str),
             'IP_INTERFACES': ('interfaces', ObjTypeList(IP,
                                                         xpath='IP')),
-            'ASSET_GROUPS': ('asset_groups', ObjTypeList(str,
+            'ASSET_GROUPS': ('asset_groups', ObjTypeList(unicode_str,
                                                          xpath='ASSET_GROUP_TITLE')),
-            'ASSET_GROUP_IDS': ('asset_group_ids', str),
+            'ASSET_GROUP_IDS': ('asset_group_ids', unicode_str),
             'VULN_INFO_LIST': ('vulns', ObjTypeList(VulnInfo,
                                                     xpath='VULN_INFO')),
             'DETECTION_LIST': ('vulns', ObjTypeList(VulnInfo,
@@ -606,9 +606,9 @@ class InterfaceSettings(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'DOMAIN': ('domain', str),
-                    'PRIMARY': ('primary', str),
-                    'SECONDARY': ('secondary', str),
+                    'DOMAIN': ('domain', unicode_str),
+                    'PRIMARY': ('primary', unicode_str),
+                    'SECONDARY': ('secondary', unicode_str),
                 })
             super(InterfaceSettings.DNS, self).__init__(*args, **kwargs)
 
@@ -619,15 +619,15 @@ class InterfaceSettings(CacheableQualysObject):
                 param_map = kwargs.pop('param_map', {})
             kwargs['param_map'] = param_map
             kwargs['param_map'].update({
-                'SETTING': ('setting', str),
-                'INTERFACE': ('interface', str),
-                'IP_ADDRESS': ('ip_address', str),
-                'NETMASK': ('netmask', str),
-                'GATEWAY': ('gateway', str),
-                'LEASE': ('lease', str),
-                'IPV6_ADDRESS': ('ipv6_address', str),
-                'SPEED': ('speed', str),
-                'DUPLEX': ('duplex', str),
+                'SETTING': ('setting', unicode_str),
+                'INTERFACE': ('interface', unicode_str),
+                'IP_ADDRESS': ('ip_address', unicode_str),
+                'NETMASK': ('netmask', unicode_str),
+                'GATEWAY': ('gateway', unicode_str),
+                'LEASE': ('lease', unicode_str),
+                'IPV6_ADDRESS': ('ipv6_address', unicode_str),
+                'SPEED': ('speed', unicode_str),
+                'DUPLEX': ('duplex', unicode_str),
                 'DNS': ('dns', self.DNS),
             })
         super(InterfaceSettings, self).__init__(*args, **kwargs)
@@ -646,10 +646,10 @@ class Proxy(CacheableQualysObject):
                 param_map = kwargs.pop('param_map', {})
             kwargs['param_map'] = param_map
             kwargs['param_map'].update({
-                'PROTOCAL': ('protocal', str),
-                'HOSTNAME': ('hostname', str),
-                'PORT': ('port', str),
-                'USER': ('user', str),
+                'PROTOCAL': ('protocal', unicode_str),
+                'HOSTNAME': ('hostname', unicode_str),
+                'PORT': ('port', unicode_str),
+                'USER': ('user', unicode_str),
             })
         super(Proxy, self).__init__(*args, **kwargs)
 
@@ -684,20 +684,20 @@ class CloudInfo(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'INSTANCE_ID': ('instance_id', str),
-                    'INSTANCE_TYPE': ('instance_type', str),
-                    'KERNEL_ID': ('kernel_id', str),
-                    'AMI_ID': ('ami_id', str),
-                    'ACCOUNT_ID': ('account_id', str),
-                    'INSTANCE_REGION': ('instance_region', str),
-                    'INSTANCE_AVAILABILITY_ZONE': ('instance_availability_zone', str),
-                    'INSTANCE_ZONE_TYPE': ('instance_zone_type', str),
-                    'INSTANCE_VPC_ID': ('instance_vpc_id', str),
-                    'INSTANCE_SUBNET_ID': ('instance_subnet_id', str),
-                    'IP_ADDRESS_PRIVATE': ('ip_address_private', str),
-                    'HOSTNAME_PRIVATE': ('hostname_private', str),
-                    'SECURITY_GROUPS': ('security_groups', str),
-                    'API_PROXY_SETTINGS': ('api_proxy_settings', str),
+                    'INSTANCE_ID': ('instance_id', unicode_str),
+                    'INSTANCE_TYPE': ('instance_type', unicode_str),
+                    'KERNEL_ID': ('kernel_id', unicode_str),
+                    'AMI_ID': ('ami_id', unicode_str),
+                    'ACCOUNT_ID': ('account_id', unicode_str),
+                    'INSTANCE_REGION': ('instance_region', unicode_str),
+                    'INSTANCE_AVAILABILITY_ZONE': ('instance_availability_zone', unicode_str),
+                    'INSTANCE_ZONE_TYPE': ('instance_zone_type', unicode_str),
+                    'INSTANCE_VPC_ID': ('instance_vpc_id', unicode_str),
+                    'INSTANCE_SUBNET_ID': ('instance_subnet_id', unicode_str),
+                    'IP_ADDRESS_PRIVATE': ('ip_address_private', unicode_str),
+                    'HOSTNAME_PRIVATE': ('hostname_private', unicode_str),
+                    'SECURITY_GROUPS': ('security_groups', unicode_str),
+                    'API_PROXY_SETTINGS': ('api_proxy_settings', unicode_str),
                 })
             super(CloudInfo.EC2Info, self).__init__(*args, **kwargs)
 
@@ -722,17 +722,17 @@ class CloudInfo(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'INSTANCE_ID': ('instance_id', str),
-                    'MACHINE_TYPE': ('machine_type', str),
-                    'PROJECT_ID': ('project_id', str),
-                    'PROJECT_NAME': ('project_name', str),
-                    'PREEMPTIBLE': ('preemptible', str),
-                    'INSTANCE_ZONE': ('instance_zone', str),
-                    'IP_ADDRESS_PRIVATE': ('ip_address_private', str),
-                    'HOSTNAME_PRIVATE': ('hostname_private', str),
-                    'IP_ADDRESS_PUBLIC': ('ip_address_public', str),
-                    'INSTANCE_NETWORK': ('instance_network', str),
-                    'GCE_INSTANCE_TAGS': ('gce_instance_tags', str),
+                    'INSTANCE_ID': ('instance_id', unicode_str),
+                    'MACHINE_TYPE': ('machine_type', unicode_str),
+                    'PROJECT_ID': ('project_id', unicode_str),
+                    'PROJECT_NAME': ('project_name', unicode_str),
+                    'PREEMPTIBLE': ('preemptible', unicode_str),
+                    'INSTANCE_ZONE': ('instance_zone', unicode_str),
+                    'IP_ADDRESS_PRIVATE': ('ip_address_private', unicode_str),
+                    'HOSTNAME_PRIVATE': ('hostname_private', unicode_str),
+                    'IP_ADDRESS_PUBLIC': ('ip_address_public', unicode_str),
+                    'INSTANCE_NETWORK': ('instance_network', unicode_str),
+                    'GCE_INSTANCE_TAGS': ('gce_instance_tags', unicode_str),
                 })
             super(CloudInfo.GCEInfo, self).__init__(*args, **kwargs)
 
@@ -752,12 +752,12 @@ class CloudInfo(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'INSTANCE_ID': ('instance_id', str),
-                    'USERNAME': ('username', str),
-                    'INSTANCE_LOCATION': ('instance_location', str),
-                    'DEPLOYMENT_MODE': ('ami_id', str),
-                    'IP_ADDRESS_PRIVATE': ('ip_address_private', str),
-                    'HOSTNAME_PRIVATE': ('hostname_private', str),
+                    'INSTANCE_ID': ('instance_id', unicode_str),
+                    'USERNAME': ('username', unicode_str),
+                    'INSTANCE_LOCATION': ('instance_location', unicode_str),
+                    'DEPLOYMENT_MODE': ('ami_id', unicode_str),
+                    'IP_ADDRESS_PRIVATE': ('ip_address_private', unicode_str),
+                    'HOSTNAME_PRIVATE': ('hostname_private', unicode_str),
                 })
             super(CloudInfo.AzureInfo, self).__init__(*args, **kwargs)
 
@@ -768,7 +768,7 @@ class CloudInfo(CacheableQualysObject):
                 param_map = kwargs.pop('param_map', {})
             kwargs['param_map'] = param_map
             kwargs['param_map'].update({
-                'PLATFORM_PROVIDER': ('platform_provider', str),
+                'PLATFORM_PROVIDER': ('platform_provider', unicode_str),
                 'EC2_INFO': ('ec2_info', self.EC2Info),
                 'GCE_INFO': ('gce_info', self.GCEInfo),
                 'AZURE_INFO': ('azure_info', self.AzureInfo),
@@ -782,20 +782,20 @@ class CloudInfo(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'INSTANCE_ID': ('instance_id', str),
-                    'INSTANCE_TYPE': ('instance_type', str),
-                    'KERNEL_ID': ('kernel_id', str),
-                    'AMI_ID': ('ami_id', str),
-                    'ACCOUNT_ID': ('account_id', str),
-                    'INSTANCE_REGION': ('instance_region', str),
-                    'INSTANCE_AVAILABILITY_ZONE': ('instance_availability_zone', str),
-                    'INSTANCE_ZONE_TYPE': ('instance_zone_type', str),
-                    'INSTANCE_VPC_ID': ('instance_vpc_id', str),
-                    'INSTANCE_SUBNET_ID': ('instance_subnet_id', str),
-                    'IP_ADDRESS_PRIVATE': ('ip_address_private', str),
-                    'HOSTNAME_PRIVATE': ('hostname_private', str),
-                    'SECURITY_GROUPS': ('security_groups', str),
-                    'API_PROXY_SETTINGS': ('api_proxy_settings', str),
+                    'INSTANCE_ID': ('instance_id', unicode_str),
+                    'INSTANCE_TYPE': ('instance_type', unicode_str),
+                    'KERNEL_ID': ('kernel_id', unicode_str),
+                    'AMI_ID': ('ami_id', unicode_str),
+                    'ACCOUNT_ID': ('account_id', unicode_str),
+                    'INSTANCE_REGION': ('instance_region', unicode_str),
+                    'INSTANCE_AVAILABILITY_ZONE': ('instance_availability_zone', unicode_str),
+                    'INSTANCE_ZONE_TYPE': ('instance_zone_type', unicode_str),
+                    'INSTANCE_VPC_ID': ('instance_vpc_id', unicode_str),
+                    'INSTANCE_SUBNET_ID': ('instance_subnet_id', unicode_str),
+                    'IP_ADDRESS_PRIVATE': ('ip_address_private', unicode_str),
+                    'HOSTNAME_PRIVATE': ('hostname_private', unicode_str),
+                    'SECURITY_GROUPS': ('security_groups', unicode_str),
+                    'API_PROXY_SETTINGS': ('api_proxy_settings', unicode_str),
                 })
             super(CloudInfo.EC2Info, self).__init__(*args, **kwargs)
 
@@ -813,10 +813,10 @@ class VLAN(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'ID': ('id', str),
-                    'NAME': ('name', str),
-                    'IP_ADDRESS': ('ip_address', str),
-                    'NETMASK': ('netmask', str),
+                    'ID': ('id', unicode_str),
+                    'NAME': ('name', unicode_str),
+                    'IP_ADDRESS': ('ip_address', unicode_str),
+                    'NETMASK': ('netmask', unicode_str),
                 })
             super(VLAN, self).__init__(*args, **kwargs)
 
@@ -834,10 +834,10 @@ class Route(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'NAME': ('name', str),
-                    'IP_ADDRESS': ('ip_address', str),
-                    'NETMASK': ('netmask', str),
-                    'GATEWAY': ('gateway', str),
+                    'NAME': ('name', unicode_str),
+                    'IP_ADDRESS': ('ip_address', unicode_str),
+                    'NETMASK': ('netmask', unicode_str),
+                    'GATEWAY': ('gateway', unicode_str),
                 })
             super(Route, self).__init__(*args, **kwargs)
 
@@ -893,8 +893,8 @@ class Appliance(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'QVSA_LICENSES_COUNT': ('qvsa_licenses_count', str),
-                    'QVSA_LICENSES_USED': ('qvsa_licenses_used', str),
+                    'QVSA_LICENSES_COUNT': ('qvsa_licenses_count', unicode_str),
+                    'QVSA_LICENSES_USED': ('qvsa_licenses_used', unicode_str),
                 })
             super(Appliance.LicenseInfo, self).__init__(*args, **kwargs)
 
@@ -909,8 +909,8 @@ class Appliance(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'ID': ('id', str),
-                    'NAME': ('name', str),
+                    'ID': ('id', unicode_str),
+                    'NAME': ('name', unicode_str),
                 })
             super(Appliance.User, self).__init__(*args, **kwargs)
 
@@ -921,42 +921,42 @@ class Appliance(CacheableQualysObject):
             param_map = kwargs.pop('param_map', {})
         kwargs['param_map'] = param_map
         kwargs['param_map'].update({
-            'ID': ('id', str),
-            'UUID': ('uuid', str),
-            'NAME': ('name', str),
-            'NETWORK_ID': ('network_id', str),
-            'SOFTWARE_VERSION': ('software_version', str),
-            'RUNNING_SLICES_COUNT': ('running_slices_count', str),
-            'RUNNING_SCAN_COUNT': ('running_scan_count', str),
-            'STATUS': ('status', str),
-            'CMD_ONLY_START': ('cmd_only_start', str),
-            'MODEL_NUMBER': ('model_number', str),
-            'SERIAL_NUMBER': ('serial_number', str),
-            'ACTIVATION_CODE': ('activation_code', str),
+            'ID': ('id', unicode_str),
+            'UUID': ('uuid', unicode_str),
+            'NAME': ('name', unicode_str),
+            'NETWORK_ID': ('network_id', unicode_str),
+            'SOFTWARE_VERSION': ('software_version', unicode_str),
+            'RUNNING_SLICES_COUNT': ('running_slices_count', unicode_str),
+            'RUNNING_SCAN_COUNT': ('running_scan_count', unicode_str),
+            'STATUS': ('status', unicode_str),
+            'CMD_ONLY_START': ('cmd_only_start', unicode_str),
+            'MODEL_NUMBER': ('model_number', unicode_str),
+            'SERIAL_NUMBER': ('serial_number', unicode_str),
+            'ACTIVATION_CODE': ('activation_code', unicode_str),
             'INTERFACE_SETTINGS': ('interface_settings', ObjTypeList(InterfaceSettings)),
             'PROXY_SETTINGS': ('proxy_settings', ObjTypeList(Proxy, xpath="PROXY")),
-            'IS_CLOUD_DEPLOYED': ('is_cloud_deployed', str),
+            'IS_CLOUD_DEPLOYED': ('is_cloud_deployed', unicode_str),
             'CLOUD_INFO': ('cloud_info', CloudInfo),
             'VLANS': ('vlans', ObjTypeList(VLAN, xpath="VLAN")),
             'STATIC_ROUTES': ('static_routes', ObjTypeList(Route, xpath="ROUTE")),
-            'ML_LATEST': ('ml_latest', str),
-            'ML_VERSION': ('ml_version', str),
-            'VULNSIGS_LATEST': ('vulnsigs_latest', str),
-            'VULNSIGS_VERSION': ('vulnsigs_version', str),
-            'ASSET_GROUP_COUNT': ('asset_group_count', str),
+            'ML_LATEST': ('ml_latest', unicode_str),
+            'ML_VERSION': ('ml_version', unicode_str),
+            'VULNSIGS_LATEST': ('vulnsigs_latest', unicode_str),
+            'VULNSIGS_VERSION': ('vulnsigs_version', unicode_str),
+            'ASSET_GROUP_COUNT': ('asset_group_count', unicode_str),
             'ASSET_GROUP_LIST': ('asset_group_list', ObjTypeList(AssetGroup, xpath="ASSET_GROUP")),
             'ASSET_TAGS_LIST': ('asset_tags_list', ObjTypeList(AssetTag, xpath="ASSET_TAG")),
             'LAST_UPDATED_DATE': ('last_updated_date', qualys_datetime_to_python),
-            'POLLING_INTERVAL': ('polling_interval', str),
-            'HEARTBEATS_MISSED': ('heartbeats_missed', str),
-            'SS_CONNECTION': ('ss_connection', str),
+            'POLLING_INTERVAL': ('polling_interval', unicode_str),
+            'HEARTBEATS_MISSED': ('heartbeats_missed', unicode_str),
+            'SS_CONNECTION': ('ss_connection', unicode_str),
             'SS_LAST_CONNECTED': ('ss_last_connected', qualys_datetime_to_python),
-            'FDCC_ENABLED': ('fdcc_enabled', str),
+            'FDCC_ENABLED': ('fdcc_enabled', unicode_str),
             'USER_LIST': ('user_list', ObjTypeList(self.User, xpath="USER_ACCOUNT")),
-            'UPDATED': ('updated', str),
-            'COMMENTS': ('comments', str),
+            'UPDATED': ('updated', unicode_str),
+            'COMMENTS': ('comments', unicode_str),
             'RUNNING_SCANS': ('running_scans', ObjTypeList(Scan, xpath="SCAN")),
-            'MAX_CAPACITY_UNITS': ('max_capacity_units', str),
+            'MAX_CAPACITY_UNITS': ('max_capacity_units', unicode_str),
             'LICENSE_INFO': ('license_info', self.LicenseInfo),
         })
         super(Appliance, self).__init__(*args, **kwargs)
@@ -1128,33 +1128,33 @@ class AssetGroup(CacheableQualysObject):
             param_map = kwargs.pop('param_map', {})
         kwargs['param_map'] = param_map
         kwargs['param_map'].update({
-            'ID': ('id', str),
-            'TITLE': ('title', str),
-            'OWNER_USER_ID': ('owner_user_id', str),
-            'OWNER_UNIT_ID': ('owner_unit_id', str),
-            'NETWORK_ID': ('network_id', str),
-            'NETWORK_IDS': ('network_ids', str),
-            'LAST_UPDATE': ('last_update', str),
-            'BUSINESS_IMPACT': ('business_impact', str),
-            'CVSS_ENVIRO_CDP': ('cvss_enviro_cdp', str),
-            'CVSS_ENVIRO_TD': ('cvss_enviro_td', str),
-            'CVSS_ENVIRO_CR': ('cvss_enviro_cr', str),
-            'CVSS_ENVIRO_IR': ('cvss_enviro_ir', str),
-            'CVSS_ENVIRO_AR': ('cvss_enviro_ar', str),
-            'DEFAULT_APPLIANCE_ID': ('default_appliance_id', str),
-            'APPLIANCE_IDS': ('appliance_ids', str),
+            'ID': ('id', unicode_str),
+            'TITLE': ('title', unicode_str),
+            'OWNER_USER_ID': ('owner_user_id', unicode_str),
+            'OWNER_UNIT_ID': ('owner_unit_id', unicode_str),
+            'NETWORK_ID': ('network_id', unicode_str),
+            'NETWORK_IDS': ('network_ids', unicode_str),
+            'LAST_UPDATE': ('last_update', unicode_str),
+            'BUSINESS_IMPACT': ('business_impact', unicode_str),
+            'CVSS_ENVIRO_CDP': ('cvss_enviro_cdp', unicode_str),
+            'CVSS_ENVIRO_TD': ('cvss_enviro_td', unicode_str),
+            'CVSS_ENVIRO_CR': ('cvss_enviro_cr', unicode_str),
+            'CVSS_ENVIRO_IR': ('cvss_enviro_ir', unicode_str),
+            'CVSS_ENVIRO_AR': ('cvss_enviro_ar', unicode_str),
+            'DEFAULT_APPLIANCE_ID': ('default_appliance_id', unicode_str),
+            'APPLIANCE_IDS': ('appliance_ids', unicode_str),
             'IP_SET': ('ip_set', self.IpSet),
-            'DOMAIN_LIST': ('domain_list', ObjTypeList(str,
+            'DOMAIN_LIST': ('domain_list', ObjTypeList(unicode_str,
                                                        xpath="DOMAIN")),
-            'DNS_LIST': ('dns_list', ObjTypeList(str,
+            'DNS_LIST': ('dns_list', ObjTypeList(unicode_str,
                                                  xpath="DNS")),
-            'NETBIOS_LIST': ('netbios_list', ObjTypeList(str,
+            'NETBIOS_LIST': ('netbios_list', ObjTypeList(unicode_str,
                                                          xpath="NETBIOS")),
-            'EC2_IDS': ('ec2_ids', str),
-            'HOST_IDS': ('host_ids', str),
-            'ASSIGNED_USER_IDS': ('assigned_user_ids', str),
-            'ASSIGNED_UNIT_IDS': ('assigned_unit_ids', str),
-            'ASSET_GROUP_TITLE': ('title', str),
+            'EC2_IDS': ('ec2_ids', unicode_str),
+            'HOST_IDS': ('host_ids', unicode_str),
+            'ASSIGNED_USER_IDS': ('assigned_user_ids', unicode_str),
+            'ASSIGNED_UNIT_IDS': ('assigned_unit_ids', unicode_str),
+            'ASSET_GROUP_TITLE': ('title', unicode_str),
             'RANGE': ('ranges', list),
         })
         super(AssetGroup, self).__init__(*args, **kwargs)
@@ -1183,8 +1183,8 @@ class AssetGroup(CacheableQualysObject):
                 param_map = kwargs.pop('param_map', {})
             kwargs['param_map'] = param_map
             kwargs['param_map'].update({
-                'netblock': ('netblock', str),
-                'network_id': ('network_id', str),
+                'netblock': ('netblock', unicode_str),
+                'network_id': ('network_id', unicode_str),
             })
             super(AssetGroup.Domain, self).__init__(*args, **kwargs)
 
@@ -1298,9 +1298,9 @@ class Report(CacheableQualysObject):
                 param_map = kwargs.pop('param_map', {})
             kwargs['param_map'] = param_map
             kwargs['param_map'].update({
-                'STATE': ('state', str),
-                'MESSAGE': ('message', str),
-                'PERCENT': ('percent', str),
+                'STATE': ('state', unicode_str),
+                'MESSAGE': ('message', unicode_str),
+                'PERCENT': ('percent', unicode_str),
             })
             super(Report.ReportStatus, self).__init__(*args, **kwargs)
 
@@ -1347,17 +1347,17 @@ class Report(CacheableQualysObject):
             param_map = kwargs.pop('param_map', {})
         kwargs['param_map'] = param_map
         kwargs['param_map'].update({
-            'TITLE': ('title', str),
+            'TITLE': ('title', unicode_str),
             'EXPIRATION_DATETIME': ('expiration_datetime',
                                     qualys_datetime_to_python),
-            'ID': ('id', str),
+            'ID': ('id', unicode_str),
             'LAUNCH_DATETIME': ('launch_datetime',
                                 qualys_datetime_to_python),
-            'OUTPUT_FORMAT': ('output_format', str),
-            'SIZE': ('size', str),
+            'OUTPUT_FORMAT': ('output_format', unicode_str),
+            'SIZE': ('size', unicode_str),
             'STATUS': ('status', self.ReportStatus),
-            'TYPE': ('type', str),
-            'USER_LOGIN': ('user_login', str)
+            'TYPE': ('type', unicode_str),
+            'USER_LOGIN': ('user_login', unicode_str)
         })
         super(Report, self).__init__(*args, **kwargs)
 
@@ -1431,9 +1431,9 @@ class CVSSImpact(CacheableQualysObject):
                 param_map = kwargs.pop('param_map', {})
             kwargs['param_map'] = param_map
             kwargs['param_map'].update({
-                'CONFIDENTIALITY': ('confidentiality', str),
-                'INTEGRITY': ('integrity', str),
-                'AVAILABILITY': ('availability', str),
+                'CONFIDENTIALITY': ('confidentiality', unicode_str),
+                'INTEGRITY': ('integrity', unicode_str),
+                'AVAILABILITY': ('availability', unicode_str),
             })
         else:
             confidentiality = kwargs.pop('CONFIDENTIALITY', None)
@@ -1481,8 +1481,8 @@ class CVSSAccess(CacheableQualysObject):
                 param_map = kwargs.pop('param_map', {})
             kwargs['param_map'] = param_map
             kwargs['param_map'].update({
-                'VECTOR': ('vector', str),
-                'COMPLEXITY': ('complexity', str),
+                'VECTOR': ('vector', unicode_str),
+                'COMPLEXITY': ('complexity', unicode_str),
             })
         else:
             vector = kwargs.pop('VECTOR', None)
@@ -1542,14 +1542,14 @@ class CVSS(CacheableQualysObject):
                 param_map = kwargs.pop('param_map', {})
             kwargs['param_map'] = param_map
             kwargs['param_map'].update({
-                'BASE': ('base', str),
-                'TEMPORAL': ('temporal', str),
+                'BASE': ('base', unicode_str),
+                'TEMPORAL': ('temporal', unicode_str),
                 'ACCESS': ('access', CVSSAccess),
                 'IMPACT': ('impact', CVSSImpact),
-                'AUTHENTICATION': ('authentication', str),
-                'EXPLOITABILITY': ('exploitability', str),
-                'REMEDIATION_LEVEL': ('remediation_level', str),
-                'REPORT_CONFIDENCE': ('report_confidence', str),
+                'AUTHENTICATION': ('authentication', unicode_str),
+                'EXPLOITABILITY': ('exploitability', unicode_str),
+                'REMEDIATION_LEVEL': ('remediation_level', unicode_str),
+                'REPORT_CONFIDENCE': ('report_confidence', unicode_str),
             })
         else:
             self.base = kwargs.pop('BASE', None)
@@ -1646,8 +1646,8 @@ class QKBVuln(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'ID': ('cve_id', str),
-                    'URL': ('url', str),
+                    'ID': ('cve_id', unicode_str),
+                    'URL': ('url', unicode_str),
                 })
             else:
                 self.cve_id = kwargs.pop('ID', None)
@@ -1668,8 +1668,8 @@ class QKBVuln(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'PRODUCT': ('product', str),
-                    'VENDOR': ('vendor_id', str),
+                    'PRODUCT': ('product', unicode_str),
+                    'VENDOR': ('vendor_id', unicode_str),
                 })
             else:
                 self.product = kwargs.pop('PRODUCT', None)
@@ -1690,8 +1690,8 @@ class QKBVuln(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'ID': ('vendor_id', str),
-                    'URL': ('url', str),
+                    'ID': ('vendor_id', unicode_str),
+                    'URL': ('url', unicode_str),
                 })
             else:
                 self.vendor_id = kwargs.pop('ID', None)
@@ -1715,9 +1715,9 @@ class QKBVuln(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'TYPE': ('ctype', str),
-                    'SECTION': ('csection', str),
-                    'DESCRIPTION': ('description', str),
+                    'TYPE': ('ctype', unicode_str),
+                    'SECTION': ('csection', unicode_str),
+                    'DESCRIPTION': ('description', unicode_str),
                 })
             else:
                 self.ctype = kwargs.pop('TYPE', None)
@@ -1741,9 +1741,9 @@ class QKBVuln(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'REF': ('ref', str),
-                    'DESC': ('desc', str),
-                    'LINK': ('link', str),
+                    'REF': ('ref', unicode_str),
+                    'DESC': ('desc', unicode_str),
+                    'LINK': ('link', unicode_str),
                 })
             else:
                 self.ref = kwargs.pop('REF', None)
@@ -1769,11 +1769,11 @@ class QKBVuln(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'MW_ID': ('mwid', str),
-                    'MW_TYPE': ('mwtype', str),
-                    'MW_PLATFORM': ('platform', str),
-                    'MW_ALIAS': ('alias', str),
-                    'MW_RATING': ('rating', str),
+                    'MW_ID': ('mwid', unicode_str),
+                    'MW_TYPE': ('mwtype', unicode_str),
+                    'MW_PLATFORM': ('platform', unicode_str),
+                    'MW_ALIAS': ('alias', unicode_str),
+                    'MW_RATING': ('rating', unicode_str),
                 })
             else:
                 self.mwid = kwargs.pop('MW_ID', None)
@@ -1797,8 +1797,8 @@ class QKBVuln(CacheableQualysObject):
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'ID': ('bugid', str),
-                    'URL': ('url', str),
+                    'ID': ('bugid', unicode_str),
+                    'URL': ('url', unicode_str),
                 })
             else:
                 self.bugid = kwargs.pop('ID', None)
@@ -1817,24 +1817,24 @@ class QKBVuln(CacheableQualysObject):
                 param_map = kwargs.pop('param_map', {})
             kwargs['param_map'] = param_map
             kwargs['param_map'].update({
-                'QID': ('qid', str),
-                'VULN_TYPE': ('vtype', str),
-                'SEVERITY_LEVEL': ('severity', str),
-                'TITLE': ('title', str),
-                'CATEGORY': ('vcat', str),
+                'QID': ('qid', unicode_str),
+                'VULN_TYPE': ('vtype', unicode_str),
+                'SEVERITY_LEVEL': ('severity', unicode_str),
+                'TITLE': ('title', unicode_str),
+                'CATEGORY': ('vcat', unicode_str),
                 'LAST_CUSTOMIZATION': ('usermod_date',
                                        qualys_datetime_to_python),
                 'LAST_SERVICE_MODIFICATION_DATETIME': ('servicemod_date',
                                                        qualys_datetime_to_python),
                 'PUBLISHED_DATETIME': ('publ_date',
                                        qualys_datetime_to_python),
-                'PATCHABLE': ('patch_avail', str),
-                'DIAGNOSIS': ('diagnosis', str),
-                'DIAGNOSIS_COMMENT': ('diagnosis_notes', str),
-                'CONSEQUENCE': ('consequence', str),
-                'CONSEQUENCE_COMMENT': ('consequence_notes', str),
-                'SOLUTION': ('solution', str),
-                'SOLUTION_COMMENT': ('solution_notes', str),
+                'PATCHABLE': ('patch_avail', unicode_str),
+                'DIAGNOSIS': ('diagnosis', unicode_str),
+                'DIAGNOSIS_COMMENT': ('diagnosis_notes', unicode_str),
+                'CONSEQUENCE': ('consequence', unicode_str),
+                'CONSEQUENCE_COMMENT': ('consequence_notes', unicode_str),
+                'SOLUTION': ('solution', unicode_str),
+                'SOLUTION_COMMENT': ('solution_notes', unicode_str),
                 'PATCHABLE': ('patch_avail', bool),
                 'PCI_FLAG': ('pci_mustfix', bool),
                 'CVSS': ('cvss', CVSS),
@@ -1937,11 +1937,11 @@ class Map(CacheableQualysObject):
             param_map = kwargs.pop('param_map', {})
         kwargs['param_map'] = param_map
         kwargs['param_map'].update({
-            'NAME': ('name', str),
-            'ref': ('ref', str),
-            'date': ('date', str),
-            'domain': ('domain', str),
-            'status': ('status', str),
+            'NAME': ('name', unicode_str),
+            'ref': ('ref', unicode_str),
+            'date': ('date', unicode_str),
+            'domain': ('domain', unicode_str),
+            'status': ('status', unicode_str),
             'OPTION_PROFILE': ('option_profiles', ObjTypeList(OptionProfile)),
         })
         super(Map, self).__init__(*args, **kwargs)
@@ -2000,10 +2000,10 @@ class Scan(CacheableQualysObject):
                 param_map = kwargs.pop('param_map', {})
             kwargs['param_map'] = param_map
             kwargs['param_map'].update({
-                'ID': ('id', str),
-                'TITLE': ('title', str),
-                'REF': ('ref', str),
-                'TYPE': ('type', str),
+                'ID': ('id', unicode_str),
+                'TITLE': ('title', unicode_str),
+                'REF': ('ref', unicode_str),
+                'TYPE': ('type', unicode_str),
                 'SCAN_DATE': ('scan_date', qualys_datetime_to_python),
             })
         super(Scan, self).__init__(*args, **kwargs)
@@ -2092,9 +2092,9 @@ class RequestEcho(CacheableQualysObject):
                 param_map = kwargs.pop('param_map', {})
             kwargs['param_map'] = param_map
             kwargs['param_map'].update({
-                'DATETIME': ('datetime', str),
-                'USER_LOGIN': ('user_login', str),
-                'RESOURCE': ('resource', str),
+                'DATETIME': ('datetime', unicode_str),
+                'USER_LOGIN': ('user_login', unicode_str),
+                'RESOURCE': ('resource', unicode_str),
             })
         else:
             self.datetime = kwargs.pop('DATETIME', None)
@@ -2177,8 +2177,8 @@ class SimpleReturn():
                         param_map = kwargs.pop('param_map', {})
                     kwargs['param_map'] = param_map
                     kwargs['param_map'].update({
-                        'KEY': ('key', str),
-                        'value': ('value', str),
+                        'KEY': ('key', unicode_str),
+                        'value': ('value', unicode_str),
                     })
                 else:
                     self.key = kwargs.pop('key', None)
@@ -2193,9 +2193,9 @@ class SimpleReturn():
                     param_map = kwargs.pop('param_map', {})
                 kwargs['param_map'] = param_map
                 kwargs['param_map'].update({
-                    'DATETIME': ('reponse_time', str),
-                    'CODE': ('response_code', str),
-                    'TEXT': ('response_text', str),
+                    'DATETIME': ('reponse_time', unicode_str),
+                    'CODE': ('response_code', unicode_str),
+                    'TEXT': ('response_text', unicode_str),
                     'ITEM_LIST': ('items', ObjTypeList(self.ResponseItem,
                                                        xpath='ITEM')),
                 })
@@ -2280,9 +2280,9 @@ class QualysUser(CacheableQualysObject):
                 param_map = kwargs.pop('param_map', {})
             kwargs['param_map'] = param_map
             kwargs['param_map'].update({
-                'LOGIN': ('login', str),
-                'FIRSTNAME': ('firstname', str),
-                'LASTNAME': ('lastname', str),
+                'LOGIN': ('login', unicode_str),
+                'FIRSTNAME': ('firstname', unicode_str),
+                'LASTNAME': ('lastname', unicode_str),
             })
         else:
             self.login = kwargs.pop('LOGIN', None)
@@ -2329,12 +2329,12 @@ class ReportTemplate(CacheableQualysObject):
                 param_map = kwargs.pop('param_map', {})
             kwargs['param_map'] = param_map
             kwargs['param_map'].update({
-                'ID': ('template_id', str),
-                'TYPE': ('report_type', str),
-                'TEMPLATE_TYPE': ('template_type', str),
-                'TITLE': ('title', str),
+                'ID': ('template_id', unicode_str),
+                'TYPE': ('report_type', unicode_str),
+                'TEMPLATE_TYPE': ('template_type', unicode_str),
+                'TITLE': ('title', unicode_str),
                 'USER': ('user', QualysUser),
-                'LAST_UPDATE': ('last_update', str),
+                'LAST_UPDATE': ('last_update', unicode_str),
                 'GLOBAL': ('is_global', bool),
                 'DEFAULT': ('is_default', bool),
             })
@@ -2373,9 +2373,9 @@ class IPRange(CacheableQualysObject):
             param_map = kwargs.pop('param_map', {})
         kwargs['param_map'] = param_map
         kwargs['param_map'].update({
-            'network_id': ('network_id', str),
-            'START': ('start', str),
-            'END': ('end', str),
+            'network_id': ('network_id', unicode_str),
+            'START': ('start', unicode_str),
+            'END': ('end', unicode_str),
         })
         super(IPRange, self).__init__(*args, **kwargs)
 
@@ -2425,7 +2425,7 @@ class ReportTarget(CacheableQualysObject):
             param_map = kwargs.pop('param_map', {})
         kwargs['param_map'] = param_map
         kwargs['param_map'].update({
-            'USER_ASSET_GROUPS': ('asset_groups', ObjTypeList(str,
+            'USER_ASSET_GROUPS': ('asset_groups', ObjTypeList(unicode_str,
                                                               xpath="/ASSET_GROUP_TITLE")),
             'USER_IP_LIST': ('ranges', ObjTypeList(IPRange)),
         })
@@ -2450,11 +2450,11 @@ class AssetTag(CacheableQualysObject):
             param_map = kwargs.pop('param_map', {})
         kwargs['param_map'] = param_map
         kwargs['param_map'].update({
-            'TAG': ('tag', str),
-            'TAG_ID': ('tag_id', str),
-            'NAME': ('name', str),
-            'COLOR': ('color', str),
-            'BACKGROUND_COLOR': ('background_color', str),
+            'TAG': ('tag', unicode_str),
+            'TAG_ID': ('tag_id', unicode_str),
+            'NAME': ('name', unicode_str),
+            'COLOR': ('color', unicode_str),
+            'BACKGROUND_COLOR': ('background_color', unicode_str),
         })
         super(AssetTag, self).__init__(*args, **kwargs)
 
@@ -2473,7 +2473,7 @@ class AssetTagSet(CacheableQualysObject):
             param_map = kwargs.pop('param_map', {})
         kwargs['param_map'] = param_map
         kwargs['param_map'].update({
-            'scope': ('scope', str),
+            'scope': ('scope', unicode_str),
             'ASSET_TAG': ('tags', list),
         })
         super(AssetTagSet, self).__init__(*args, **kwargs)
@@ -2503,10 +2503,10 @@ class ReportHeader(CacheableQualysObject):
             param_map = kwargs.pop('param_map', {})
         kwargs['param_map'] = param_map
         kwargs['param_map'].update({
-            'COMPANY': ('company', str),
-            'USERNAME': ('username', str),
-            'GENERATION_DATETIME': ('generation_datetime', str),
-            'TEMPLATE': ('template', str),
+            'COMPANY': ('company', unicode_str),
+            'USERNAME': ('username', unicode_str),
+            'GENERATION_DATETIME': ('generation_datetime', unicode_str),
+            'TEMPLATE': ('template', unicode_str),
             'TARGET': ('target', ReportTarget),
             'ASSET_TAG_LIST': ({
                                    ('included_tags', ObjTypeList(AssetTagSet,
@@ -2568,9 +2568,9 @@ class AssetWarning(CacheableQualysObject):
             param_map = kwargs.pop('param_map', {})
         kwargs['param_map'] = param_map
         kwargs['param_map'].update({
-            'CODE': ('code', str),
-            'TEXT': ('text', str),
-            'URL': ('url', str),
+            'CODE': ('code', unicode_str),
+            'TEXT': ('text', unicode_str),
+            'URL': ('url', unicode_str),
         })
         super(AssetWarning, self).__init__(*args, **kwargs)
 
