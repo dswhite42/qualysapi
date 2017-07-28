@@ -44,7 +44,7 @@ def qualys_datetime_to_python(qdatestr):
     
 def unicode_str(qstr):
     try:
-        return str(qstr.encode('ascii', 'ignore'))
+        return str(qstr.encode('ascii', 'ignore').decode('utf-8'))
     except:
         logger.warn('Invalid string - %s' % qstr)
         return None
