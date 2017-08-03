@@ -276,21 +276,21 @@ class VulnInfo(CacheableQualysObject):
             param_map = kwargs.pop('param_map', {})
         kwargs['param_map'] = param_map
         kwargs['param_map'].update({
-            'QID': ('qid', str),
-            'TYPE': ('type', str),
-            'PORT': ('port', str),
-            'SERVICE': ('service', str),
-            'FQDN': ('fqdn', str),
-            'PROTOCOL': ('protocol', str),
-            'SSL': ('ssl', str),
+            'QID': ('qid', unicode_str),
+            'TYPE': ('type', unicode_str),
+            'PORT': ('port', unicode_str),
+            'SERVICE': ('service', unicode_str),
+            'FQDN': ('fqdn', unicode_str),
+            'PROTOCOL': ('protocol', unicode_str),
+            'SSL': ('ssl', unicode_str),
             # NOTE: I haven't implemented the format attribute because it is
             # always implied as 'table' with the data in RESULT being a
             # delim-text format of some kind (CSV/TSV/Columar Text) but the
             # attribute just says 'table'.  We will have to do discovery
             # at some point to expose parsing functionality for this data that
             # isn't XML based parsing.
-            'RESULT': ('result', str),
-            'RESULTS': ('result', str),
+            'RESULT': ('result', unicode_str),
+            'RESULTS': ('result', unicode_str),
             'FIRST_FOUND': ('first_found',
                             qualys_datetime_to_python),
             'LAST_FOUND': ('last_found',
@@ -305,14 +305,14 @@ class VulnInfo(CacheableQualysObject):
                                      qualys_datetime_to_python),
             'LAST_FIXED_DATETIME': ('last_fixed_datetime',
                                     qualys_datetime_to_python),
-            'TIMES_FOUND': ('times_found', str),
-            'VULN_STATUS': ('status', str),
-            'STATUS': ('status', str),
-            'CVSS_FINAL': ('cvss_final', str),
-            'TICKET_NUMBER': ('ticket_number', str),
-            'TICKET_STATE': ('ticket_state', str),
-            'INSTANCE': ('instance', str),
-            'SEVERITY': ('severity', str),
+            'TIMES_FOUND': ('times_found', unicode_str),
+            'VULN_STATUS': ('status', unicode_str),
+            'STATUS': ('status', unicode_str),
+            'CVSS_FINAL': ('cvss_final', unicode_str),
+            'TICKET_NUMBER': ('ticket_number', unicode_str),
+            'TICKET_STATE': ('ticket_state', unicode_str),
+            'INSTANCE': ('instance', unicode_str),
+            'SEVERITY': ('severity', unicode_str),
         })
         super(VulnInfo, self).__init__(*args, **kwargs)
         # format the last scan into a dagtetime
@@ -351,12 +351,12 @@ class UserDefs(CacheableQualysObject):
             param_map = kwargs.pop('param_map', {})
         kwargs['param_map'] = param_map
         kwargs['param_map'].update({
-            'LABEL_1': ('label_1', str),
-            'LABEL_2': ('label_2', str),
-            'LABEL_3': ('label_3', str),
-            'VALUE_1': ('value_1', str),
-            'VALUE_2': ('value_2', str),
-            'VALUE_3': ('value_3', str),
+            'LABEL_1': ('label_1', unicode_str),
+            'LABEL_2': ('label_2', unicode_str),
+            'LABEL_3': ('label_3', unicode_str),
+            'VALUE_1': ('value_1', unicode_str),
+            'VALUE_2': ('value_2', unicode_str),
+            'VALUE_3': ('value_3', unicode_str),
         })
         super(UserDefs, self).__init__(*args, **kwargs)
 
@@ -378,8 +378,8 @@ class IP(CacheableQualysObject):
             param_map = kwargs.pop('param_map', {})
         kwargs['param_map'] = param_map
         kwargs['param_map'].update({
-            'network_id': ('network_id', str),
-            'v6': ('ipv6', str),
+            'network_id': ('network_id', unicode_str),
+            'v6': ('ipv6', unicode_str),
         })
         super(IP, self).__init__(*args, **kwargs)
         elem = kwargs.get('elem', None)
@@ -543,18 +543,18 @@ class Host(CacheableQualysObject):
                                                  xpath='RANGE')),
             'IPV6': ('ip', IP),  # overwrite ip
             'ID_SET': ('id_set', AssetGroupIdSet),
-            'ID': ('id', str),
-            'NETWORK_ID': ('network_id', str),
-            'OWNER': ('owner', str),
-            'COMMENTS': ('comments', str),
-            'EC2_INSTANCE_ID': ('ec2_instance_id', str),
+            'ID': ('id', unicode_str),
+            'NETWORK_ID': ('network_id', unicode_str),
+            'OWNER': ('owner', unicode_str),
+            'COMMENTS': ('comments', unicode_str),
+            'EC2_INSTANCE_ID': ('ec2_instance_id', unicode_str),
             'LAST_COMPLIANCE_SCAN_DATETIME': ('last_compliance_scan_datetime',
                                               qualys_datetime_to_python),
             'LAST_VULN_SCAN_DATETIME': ('last_scan_datetime',
                                         qualys_datetime_to_python),
             'LAST_SCAN_DATETIME': ('last_scan_datetime',
                                    qualys_datetime_to_python),
-            'TRACKING_METHOD': ('tracking_method', str),
+            'TRACKING_METHOD': ('tracking_method', unicode_str),
             'USER_DEF': ('user_def', UserDefs),
             'ASSET_TAGS': ('asset_tags', ObjTypeList(unicode_str,
                                                      xpath='ASSET_TAG')),
