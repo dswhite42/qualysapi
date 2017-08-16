@@ -1143,7 +1143,7 @@ class AssetGroup(CacheableQualysObject):
             'CVSS_ENVIRO_AR': ('cvss_enviro_ar', unicode_str),
             'DEFAULT_APPLIANCE_ID': ('default_appliance_id', unicode_str),
             'APPLIANCE_IDS': ('appliance_ids', unicode_str),
-            'IP_SET': ('ip_set', self.IpSet),
+            'IP_SET': ('ip_set', IpSet),
             'DOMAIN_LIST': ('domain_list', ObjTypeList(unicode_str,
                                                        xpath="DOMAIN")),
             'DNS_LIST': ('dns_list', ObjTypeList(unicode_str,
@@ -1188,27 +1188,6 @@ class AssetGroup(CacheableQualysObject):
             })
             super(AssetGroup.Domain, self).__init__(*args, **kwargs)
 
-    class IpSet(CacheableQualysObject):
-        '''Element group handling for IPSET tags. Network ID attributes are
-        ignored.
-        ::
-            <!ATTLIST IP network_id CDATA #IMPLIED>
-            <!ATTLIST IP_RANGE network_id CDATA #IMPLIED>
-        '''
-        ips = None  #: string list of ips
-        ip_ranges = None  #: string list of ip ranges
-
-        def __init__(self, *args, **kwargs):
-            param_map = {}
-            if 'param_map' in kwargs:
-                param_map = kwargs.pop('param_map', {})
-            kwargs['param_map'] = param_map
-            kwargs['param_map'].update({
-                'IP': ('ips', list),
-                'IP_RANGE': ('ip_ranges', list),
-            })
-            super(IpSet, self).__init__(*args, **kwargs)
-
     def addAsset(conn, ip):
         call = '/api/2.0/fo/asset/group/'
         parameters = {'action': 'edit', 'id': self.id, 'add_ips': ip}
@@ -1233,6 +1212,27 @@ class AssetGroup(CacheableQualysObject):
 #         self.type = type
 #         self.user = user.LOGIN
 
+class IpSet(CacheableQualysObject):
+	'''Element group handling for IPSET tags. Network ID attributes are
+	ignored.
+	::
+		<!ATTLIST IP network_id CDATA #IMPLIED>
+		<!ATTLIST IP_RANGE network_id CDATA #IMPLIED>
+	'''
+	ips = None  #: string list of ips
+	ip_ranges = None  #: string list of ip ranges
+
+	def __init__(self, *args, **kwargs):
+		param_map = {}
+		if 'param_map' in kwargs:
+			param_map = kwargs.pop('param_map', {})
+		kwargs['param_map'] = param_map
+		kwargs['param_map'].update({
+			'IP': ('ips', list),
+			'IP_RANGE': ('ip_ranges', list),
+		})
+		super(IpSet, self).__init__(*args, **kwargs)
+			
 class Report(CacheableQualysObject):
     '''
     An object wrapper around qualys report handles.
