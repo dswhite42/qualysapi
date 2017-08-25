@@ -1886,20 +1886,25 @@ class QKBVuln(CacheableQualysObject):
 
 class OptionProfile(CacheableQualysObject):
     title = None
-    is_default = False
+    is_default = None
 
     def __init__(self, *args, **kwargs):
-        el = None
+        if 'elem' in kwargs or 'xml' in kwargs:
+            param_map = {}
+            if 'param_map' in kwargs:
+                param_map = kwargs.pop('param_map', {})
+            kwargs['param_map'] = param_map
+            kwargs['param_map'].update({
+                'TITLE': ('title', unicode_str),
+                'IS_DEFAULT': ('is_default', unicode_str),
+            })
+        else:
+            self.title = kwargs.pop('TITLE', None)
+            self.is_default = kwargs.pop('IS_DEFAULT', None)
+        super(OptionProfile, self).__init__(*args, **kwargs)
 
-        # args or kwargs...
-        if len(args):
-            el = args[0]
-        elif kwargs.get('elem', None):
-            el = kwargs.get('elem')
-
-        if el is not None:
-            self.title = el.text
-            self.is_default = (el.get('option_profile_default', 1) == 0)
+        def __repr__(self):
+            return self.title
 
 
 class Map(CacheableQualysObject):
@@ -1988,10 +1993,36 @@ class MapResult(Map):
 class Scan(CacheableQualysObject):
 
     id = None
-    title = None
     ref = None
     type = None
-    scan_date = None
+    title = None
+    user_login = None
+    launch_datetime = None
+    duration = None
+    processing_priority = None
+    processed = None
+    status = None
+    target = None
+    option_profile = None
+
+    class Status(CacheableQualysObject):
+        '''
+        A single bugtraq metadata set
+        '''
+        state = None
+
+        def __init__(self, *args, **kwargs):
+            if 'elem' in kwargs or 'xml' in kwargs:
+                param_map = {}
+                if 'param_map' in kwargs:
+                    param_map = kwargs.pop('param_map', {})
+                kwargs['param_map'] = param_map
+                kwargs['param_map'].update({
+                    'STATE': ('state', unicode_str),
+                })
+            else:
+                self.bugid = kwargs.pop('STATE', None)
+            super(Scan.Status, self).__init__(*args, **kwargs)
 
     def __init__(self, *args, **kwargs):
         if 'elem' in kwargs or 'xml' in kwargs:
@@ -2001,10 +2032,17 @@ class Scan(CacheableQualysObject):
             kwargs['param_map'] = param_map
             kwargs['param_map'].update({
                 'ID': ('id', unicode_str),
-                'TITLE': ('title', unicode_str),
                 'REF': ('ref', unicode_str),
                 'TYPE': ('type', unicode_str),
-                'SCAN_DATE': ('scan_date', qualys_datetime_to_python),
+                'TITLE': ('title', unicode_str),
+                'USER_LOGIN': ('user_login', unicode_str),
+                'LAUNCH_DATETIME': ('launch_datetime', qualys_datetime_to_python),
+                'DURATION': ('duration', unicode_str),
+                'PROCESSING_PRIORITY': ('processing_priority', unicode_str),
+                'PROCESSED': ('processed', unicode_str),
+                'STATUS': ('status', self.Status),
+                'TARGET': ('target', unicode_str),
+                'OPTION_PROFILE': ('option_profile', OptionProfile),
             })
         super(Scan, self).__init__(*args, **kwargs)
 

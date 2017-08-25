@@ -163,7 +163,7 @@ class BufferConsumer(multiprocessing.Process):
         '''
         while True:
             try:
-                logger.debug("%s: queue size:%s" % (self.name, self.queue.qsize()))
+                #logger.debug("%s: queue size:%s" % (self.name, self.queue.qsize()))
                 item = self.queue.get()
                 logger.debug(item)
                 if isinstance(item, PoisonPill):
@@ -373,8 +373,10 @@ class MPQueueImportBuffer(QueueImportBuffer):
             logger.debug("Joining on consumer")
             self.queue.join()
                 # get everything on the results queue right now.
-            while self.results_queue.qsize() > 0:
-                logger.debug("results_queue length: %s" % self.results_queue.qsize())
+
+
+            while not self.results_queue.empty():
+                #logger.debug("results_queue length: %s" % self.results_queue.qsize())
                 itm = self.results_queue.get()
                 if isinstance(itm, Host):
                     logger.debug("finished %s" % str(itm.id))
@@ -395,7 +397,7 @@ class MPQueueImportBuffer(QueueImportBuffer):
             
             try:
                 while True:
-                    logger.debug("self.results_queue.qsize(): %s" % self.results_queue.qsize())
+                    #logger.debug("self.results_queue.qsize(): %s" % self.results_queue.qsize())
                     self.results_list.append(self.results_queue.get(False, timeout=5))
                     self.results_queue.task_done()
                     logger.debug("task done")

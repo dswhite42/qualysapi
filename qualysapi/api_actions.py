@@ -578,46 +578,44 @@ parser.')
         data = {}
         return self.parseResponse(source=call, data=data)
 
-    def listScans(self, launched_after="", state="", target="", type="",
-                  user_login=""):
+    def listScans(self, consumer_prototype=None, **kwargs):
         # 'launched_after' parameter accepts a date in the format: YYYY-MM-DD
         # 'state' parameter accepts "Running", "Paused", "Canceled", "Finished", "Error", "Queued", and "Loading".
         # 'title' parameter accepts a string
         # 'type' parameter accepts "On-Demand", and "Scheduled".
         # 'user_login' parameter accepts a user name (string)
         call = '/api/2.0/fo/scan/'
-        parameters = {'action': 'list', 'show_ags': 1, 'show_op': 1, 'show_status': 1}
-        if launched_after != "":
-            parameters['launched_after_datetime'] = launched_after
+        optional_params = [
+            ('action', 'list'),
+            ('echo_request', '0'),
+            ('scan_ref', None),
+            ('show_id', None),
+            ('state', None),
+            ('processed', None),
+            ('type', None),
+            ('target', None),
+            ('user_login', None),
+            ('launched_after_datetime', None),
+            ('launched_before_datetime', None),
+            ('show_ags', None),
+            ('show_op', '1'),
+            ('show_status', None),
+            ('show_last', None),
+            ('pci_only', None),
+            ('ignore_target', None),
+        ]
+        params = {
+            key: kwargs.get(key, default) for (key, default) in
+            optional_params if kwargs.get(key, default) is not None
+        }
 
-        if state != "":
-            parameters['state'] = state
-
-        if target != "":
-            parameters['target'] = target
-
-        if type != "":
-            parameters['type'] = type
-
-        if user_login != "":
-            parameters['user_login'] = user_login
-
-        scanlist = objectify.fromstring(self.request(call, data=parameters))
-        scanArray = []
-        for scan in scanlist.RESPONSE.SCAN_LIST.SCAN:
-            try:
-                agList = []
-                for ag in scan.ASSET_GROUP_TITLE_LIST.ASSET_GROUP_TITLE:
-                    agList.append(ag)
-            except AttributeError:
-                agList = []
-
-            scanArray.append(Scan(agList, scan.DURATION, scan.LAUNCH_DATETIME,
-                                  scan.OPTION_PROFILE.TITLE, scan.PROCESSED, scan.REF,
-                                  scan.STATUS, scan.TARGET, scan.TITLE, scan.TYPE,
-                                  scan.USER_LOGIN))
-
-        return scanArray
+        return self.parseResponse(source=call, data=params,
+                                  consumer_prototype=consumer_prototype,
+                                  obj_elem_map={
+                                      'SCAN': Scan,
+                                      'WARNING': AssetWarning,
+                                  },
+                                  **kwargs)
 
     def launchScan(self, title, option_title, iscanner_name, asset_groups="",
                    ip=""):
@@ -854,6 +852,7 @@ parser.')
                                       'WARNING': AssetWarning,
                                   },
                                   **kwargs)
+
     def assetIterativeWrapper(self, consumer_prototype=None, max_results=0,
                               list_type_combine=None, exit=None, internal_call=None, **kwargs):
         """assetIterativeWrapper
