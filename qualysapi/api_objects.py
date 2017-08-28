@@ -1841,7 +1841,7 @@ class QKBVuln(CacheableQualysObject):
                 'BUGTRAQ_LIST': ('bugtraq_listing',
                                  ObjTypeList(self.Bugtraq)),
                 'CVE_LIST': ('cve_list',
-                             ObjTypeList(self.CVE)),
+                             ObjTypeList(self.CVE, xpath='CVE')),
                 'PCI_REASONS': ('pci_reasons',
                                 ObjTypeList(self.PCIReason)),
                 'SOFTWARE_LIST': ('affected_software',
