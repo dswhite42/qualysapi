@@ -35,7 +35,7 @@ def date_param_format(date):
 
 def qualys_datetime_to_python(qdatestr):
     try:
-        return iso8601parser.parse(str(qdatestr))
+        return iso8601parser.parse(str(qdatestr.splitlines()[0]))
     except:
         logger.warn('Invalid date string - "%s"' % (qdatestr))
         return None

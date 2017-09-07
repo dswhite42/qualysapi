@@ -580,8 +580,8 @@ class Host(CacheableQualysObject):
 
         self.parent_stub = kwargs.get('report_stub', None)
 
-class InterfaceSettings(CacheableQualysObject):
 
+class InterfaceSettings(CacheableQualysObject):
     setting = None
     interface = None
     ip_address = None
@@ -632,8 +632,8 @@ class InterfaceSettings(CacheableQualysObject):
             })
         super(InterfaceSettings, self).__init__(*args, **kwargs)
 
-class Proxy(CacheableQualysObject):
 
+class Proxy(CacheableQualysObject):
     protocal = None
     hostname = None
     port = None
@@ -653,8 +653,8 @@ class Proxy(CacheableQualysObject):
             })
         super(Proxy, self).__init__(*args, **kwargs)
 
-class CloudInfo(CacheableQualysObject):
 
+class CloudInfo(CacheableQualysObject):
     platform_provider = None
     ec2_info = None
     gce_info = None
@@ -799,50 +799,50 @@ class CloudInfo(CacheableQualysObject):
                 })
             super(CloudInfo.EC2Info, self).__init__(*args, **kwargs)
 
+
 class VLAN(CacheableQualysObject):
+    id = None
+    name = None
+    ip_address = None
+    netmask = None
 
-        id = None
-        name = None
-        ip_address = None
-        netmask = None
+    def __init__(self, *args, **kwargs):
+        if 'elem' in kwargs or 'xml' in kwargs:
+            param_map = {}
+            if 'param_map' in kwargs:
+                param_map = kwargs.pop('param_map', {})
+            kwargs['param_map'] = param_map
+            kwargs['param_map'].update({
+                'ID': ('id', unicode_str),
+                'NAME': ('name', unicode_str),
+                'IP_ADDRESS': ('ip_address', unicode_str),
+                'NETMASK': ('netmask', unicode_str),
+            })
+        super(VLAN, self).__init__(*args, **kwargs)
 
-        def __init__(self, *args, **kwargs):
-            if 'elem' in kwargs or 'xml' in kwargs:
-                param_map = {}
-                if 'param_map' in kwargs:
-                    param_map = kwargs.pop('param_map', {})
-                kwargs['param_map'] = param_map
-                kwargs['param_map'].update({
-                    'ID': ('id', unicode_str),
-                    'NAME': ('name', unicode_str),
-                    'IP_ADDRESS': ('ip_address', unicode_str),
-                    'NETMASK': ('netmask', unicode_str),
-                })
-            super(VLAN, self).__init__(*args, **kwargs)
 
 class Route(CacheableQualysObject):
+    name = None
+    ip_address = None
+    netmask = None
+    gateway = None
 
-        name = None
-        ip_address = None
-        netmask = None
-        gateway = None
+    def __init__(self, *args, **kwargs):
+        if 'elem' in kwargs or 'xml' in kwargs:
+            param_map = {}
+            if 'param_map' in kwargs:
+                param_map = kwargs.pop('param_map', {})
+            kwargs['param_map'] = param_map
+            kwargs['param_map'].update({
+                'NAME': ('name', unicode_str),
+                'IP_ADDRESS': ('ip_address', unicode_str),
+                'NETMASK': ('netmask', unicode_str),
+                'GATEWAY': ('gateway', unicode_str),
+            })
+        super(Route, self).__init__(*args, **kwargs)
 
-        def __init__(self, *args, **kwargs):
-            if 'elem' in kwargs or 'xml' in kwargs:
-                param_map = {}
-                if 'param_map' in kwargs:
-                    param_map = kwargs.pop('param_map', {})
-                kwargs['param_map'] = param_map
-                kwargs['param_map'].update({
-                    'NAME': ('name', unicode_str),
-                    'IP_ADDRESS': ('ip_address', unicode_str),
-                    'NETMASK': ('netmask', unicode_str),
-                    'GATEWAY': ('gateway', unicode_str),
-                })
-            super(Route, self).__init__(*args, **kwargs)
 
 class Appliance(CacheableQualysObject):
-
     id = None
     uuid = None
     name = None
@@ -913,7 +913,6 @@ class Appliance(CacheableQualysObject):
                     'NAME': ('name', unicode_str),
                 })
             super(Appliance.User, self).__init__(*args, **kwargs)
-
 
     def __init__(self, *args, **kwargs):
         param_map = {}
@@ -1213,26 +1212,27 @@ class AssetGroup(CacheableQualysObject):
 #         self.user = user.LOGIN
 
 class IpSet(CacheableQualysObject):
-	'''Element group handling for IPSET tags. Network ID attributes are
-	ignored.
-	::
-		<!ATTLIST IP network_id CDATA #IMPLIED>
-		<!ATTLIST IP_RANGE network_id CDATA #IMPLIED>
-	'''
-	ips = None  #: string list of ips
-	ip_ranges = None  #: string list of ip ranges
+    '''Element group handling for IPSET tags. Network ID attributes are
+    ignored.
+    ::
+        <!ATTLIST IP network_id CDATA #IMPLIED>
+        <!ATTLIST IP_RANGE network_id CDATA #IMPLIED>
+    '''
+    ips = None  #: string list of ips
+    ip_ranges = None  #: string list of ip ranges
 
-	def __init__(self, *args, **kwargs):
-		param_map = {}
-		if 'param_map' in kwargs:
-			param_map = kwargs.pop('param_map', {})
-		kwargs['param_map'] = param_map
-		kwargs['param_map'].update({
-			'IP': ('ips', list),
-			'IP_RANGE': ('ip_ranges', list),
-		})
-		super(IpSet, self).__init__(*args, **kwargs)
-			
+    def __init__(self, *args, **kwargs):
+        param_map = {}
+        if 'param_map' in kwargs:
+            param_map = kwargs.pop('param_map', {})
+        kwargs['param_map'] = param_map
+        kwargs['param_map'].update({
+            'IP': ('ips', list),
+            'IP_RANGE': ('ip_ranges', list),
+        })
+        super(IpSet, self).__init__(*args, **kwargs)
+
+
 class Report(CacheableQualysObject):
     '''
     An object wrapper around qualys report handles.
@@ -1565,6 +1565,29 @@ class CVSS(CacheableQualysObject):
         super(CVSS, self).__init__(*args, **kwargs)
 
 
+class CVE(CacheableQualysObject):
+    '''
+    CVE metadata encoding wrapper object and helpers.
+    '''
+    cve_id = None
+    url = None
+
+    def __init__(self, *args, **kwargs):
+        if 'elem' in kwargs or 'xml' in kwargs:
+            param_map = {}
+            if 'param_map' in kwargs:
+                param_map = kwargs.pop('param_map', {})
+            kwargs['param_map'] = param_map
+            kwargs['param_map'].update({
+                'ID': ('cve_id', unicode_str),
+                'URL': ('url', unicode_str),
+            })
+        else:
+            self.cve_id = kwargs.pop('ID', None)
+            self.url = kwargs.pop('URL', None)
+        super(CVE, self).__init__(*args, **kwargs)
+
+
 class QKBVuln(CacheableQualysObject):
     '''
     A class respresentation of a Qualys Knowledge Base entry.
@@ -1631,28 +1654,6 @@ class QKBVuln(CacheableQualysObject):
         vulnerability.
         '''
         pass
-
-    class CVE(CacheableQualysObject):
-        '''
-        CVE metadata encoding wrapper object and helpers.
-        '''
-        cve_id = None
-        url = None
-
-        def __init__(self, *args, **kwargs):
-            if 'elem' in kwargs or 'xml' in kwargs:
-                param_map = {}
-                if 'param_map' in kwargs:
-                    param_map = kwargs.pop('param_map', {})
-                kwargs['param_map'] = param_map
-                kwargs['param_map'].update({
-                    'ID': ('cve_id', unicode_str),
-                    'URL': ('url', unicode_str),
-                })
-            else:
-                self.cve_id = kwargs.pop('ID', None)
-                self.url = kwargs.pop('URL', None)
-            super(QKBVuln.CVE, self).__init__(*args, **kwargs)
 
     class VulnSoftware(CacheableQualysObject):
         '''
@@ -1841,7 +1842,7 @@ class QKBVuln(CacheableQualysObject):
                 'BUGTRAQ_LIST': ('bugtraq_listing',
                                  ObjTypeList(self.Bugtraq)),
                 'CVE_LIST': ('cve_list',
-                             ObjTypeList(self.CVE, xpath='CVE')),
+                             ObjTypeList(CVE, xpath='CVE')),
                 'PCI_REASONS': ('pci_reasons',
                                 ObjTypeList(self.PCIReason)),
                 'SOFTWARE_LIST': ('affected_software',
@@ -1991,7 +1992,6 @@ class MapResult(Map):
 
 
 class Scan(CacheableQualysObject):
-
     id = None
     ref = None
     type = None

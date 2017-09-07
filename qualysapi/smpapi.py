@@ -165,7 +165,6 @@ class BufferConsumer(multiprocessing.Process):
             try:
                 #logger.debug("%s: queue size:%s" % (self.name, self.queue.qsize()))
                 item = self.queue.get()
-                logger.debug(item)
                 if isinstance(item, PoisonPill):
                     logger.debug("%s: Got poison pill, ending" % self.name)
                     self.queue.task_done()
