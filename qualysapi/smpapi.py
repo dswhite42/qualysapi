@@ -193,6 +193,7 @@ class BufferConsumer(multiprocessing.Process):
                 # general thread exception.
                 logger.error('%s exception: %s' % (self.name, e))
                 self.alive = False
+                self.queue.task_done()
                 # TODO: continue trying/trap exceptions?
                 raise
         return
