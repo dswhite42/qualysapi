@@ -163,21 +163,21 @@ class BufferConsumer(multiprocessing.Process):
         '''
         while True:
             try:
-                #logger.debug("%s: queue size:%s" % (self.name, self.queue.qsize()))
+                ##logger.debug("%s: queue size:%s" % (self.name, self.queue.qsize()))
                 item = self.queue.get()
                 if isinstance(item, PoisonPill):
-                    logger.debug("%s: Got poison pill, ending" % self.name)
+                    #logger.debug("%s: Got poison pill, ending" % self.name)
                     self.queue.task_done()
                     return
                 # the base class just logs this stuff
-                if isinstance(item, Host):
-                    logger.debug("%s: processing %s" % (self.name, str(item.id)))
+                #if isinstance(item, Host):
+                    #logger.debug("%s: processing %s" % (self.name, str(item.id)))
                 rval = self.singleItemHandler(item)
                 self.queue.task_done()
                 if rval and self.results_queue:
                     self.results_queue.put(rval)
-                    if isinstance(rval, Host):
-                        logger.debug("%s: processed %s" % (self.name, str(rval.id)))
+                    #if isinstance(rval, Host):
+                        #logger.debug("%s: processed %s" % (self.name, str(rval.id)))
 #             except queue.Empty:
 #                 logger.debug('%s: Queue timed out after 10 seconds.' % self.name)
 #                 self.alive = False
@@ -348,7 +348,7 @@ class MPQueueImportBuffer(QueueImportBuffer):
                     results_queue=self.results_queue,
                     response_error=self.response_error,
                     name=('Consumer-' + str(self.spawned_counter)))
-            logger.debug('Spawning consumer (%s).' % new_consumer.name)
+            #logger.debug('Spawning consumer (%s).' % new_consumer.name)
             new_consumer.start()
             self.running.append(new_consumer)
             self.spawned_counter = self.spawned_counter + 1
@@ -366,10 +366,10 @@ class MPQueueImportBuffer(QueueImportBuffer):
         # close the queue and wait until it is consumed
         if block:
 #             self.queue.close()
-#             logger.debug("Closing queue and waiting for consumer")
+#             #logger.debug("Closing queue and waiting for consumer")
 #             self.queue.join_thread()
             # make sure the consumers are done consuming the queue
-            logger.debug("Joining on consumer")
+            #logger.debug("Joining on consumer")
             self.queue.join()
                 # get everything on the results queue right now.
 
@@ -377,8 +377,8 @@ class MPQueueImportBuffer(QueueImportBuffer):
             while not self.results_queue.empty():
                 #logger.debug("results_queue length: %s" % self.results_queue.qsize())
                 itm = self.results_queue.get()
-                if isinstance(itm, Host):
-                    logger.debug("finished %s" % str(itm.id))
+                #if isinstance(itm, Host):
+                    #logger.debug("finished %s" % str(itm.id))
                 self.results_list.append(itm)
                 self.results_queue.task_done()
                 # TODO: implement this
@@ -393,18 +393,18 @@ class MPQueueImportBuffer(QueueImportBuffer):
                 return self.callback(self.results_list)
         else:
             # read results immediately available.
-            
+
             try:
                 while True:
                     #logger.debug("self.results_queue.qsize(): %s" % self.results_queue.qsize())
                     self.results_list.append(self.results_queue.get(False, timeout=5))
                     self.results_queue.task_done()
-                    logger.debug("task done")
+                    #logger.debug("task done")
             except queue.Empty:
                 # got everything on the queue so far
-                logger.debug("Queue empty")
+                #logger.debug("Queue empty")
                 pass
-        logger.debug("len(self.results_list): %s" % len(self.results_list))
+        #logger.debug("len(self.results_list): %s" % len(self.results_list))
         return self.results_list
 
 
@@ -417,7 +417,7 @@ class MPQueueImportBuffer(QueueImportBuffer):
 #     report_ref
 #     def __init__(self, report, *args, **kwargs):
 #         """__init__
-# 
+#
 #         :param report:
 #         assigns the internal report reference for this particular buffer.
 #         :param *args:
@@ -778,7 +778,7 @@ subclass of QualysStatusMonitor.' % type(proxy).__name__)
             raise threading.ThreadError('Our children are misbehaving!')
 
 class PoisonPill(object):
-    
+
     def __init__(self):
         pass
 
@@ -878,7 +878,7 @@ class QGSMPActions(QGActions):
             context = etree.iterparse(response, events=('end',), huge_tree=True)
             # optional default elem/obj mapping override
             local_elem_map = kwargs.get('obj_elem_map', queue_elem_map)
-            logger.debug(local_elem_map)
+            #logger.debug(local_elem_map)
             for event, elem in context:
                 # Use QName to avoid specifying or stripping the namespace, which we don't need
                 if exit.is_set():
@@ -886,10 +886,10 @@ class QGSMPActions(QGActions):
                     break
                 stag = etree.QName(elem.tag).localname.upper()
                 if stag in local_elem_map:
-                    logger.debug('Adding type "%s" to queue.' % (local_elem_map[stag]))
+                    #logger.debug('Adding type "%s" to queue.' % (local_elem_map[stag]))
                     item = local_elem_map[stag](elem=elem,
                         report_stub=rstub)
-                    # logger.debug("Adding %s to queue" % str(item.id))
+                    # #logger.debug("Adding %s to queue" % str(item.id))
                     self.import_buffer.queueAdd(local_elem_map[stag](elem=elem,
                         report_stub=rstub))
                     # elem.clear() #don't fill up a dom we don't need.
@@ -899,7 +899,7 @@ class QGSMPActions(QGActions):
         for csmr in self.import_buffer.running:
             self.import_buffer.queueAdd(PoisonPill())
         results = self.import_buffer.finish(block=True)
-        logger.debug("Checking results")
+        #logger.debug("Checking results")
         self.checkResults(results)
 
         # special case: report encapsulization...

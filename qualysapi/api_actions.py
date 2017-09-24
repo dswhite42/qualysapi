@@ -803,6 +803,7 @@ parser.')
             ('show_tags', None),  #: {0|1}
             ('suppress_duplicated_data_from_csv', None),  #: {0|1}
             ('max_days_since_last_vm_scan', None),  #: {value}
+            ('max_days_since_detection_updated', None),
         ]
         call = '/api/2.0/fo/asset/host/vm/detection/'
         params = {
@@ -903,7 +904,7 @@ parser.')
                         id_min_tmp = int(id_min_tmp)
                         if id_min_tmp > prev_id_min:
                             id_min = id_min_tmp
-                            logger.debug("ID_MIN: %s" % id_min)
+                            #logger.debug("ID_MIN: %s" % id_min)
                             break
                     except:
                         break

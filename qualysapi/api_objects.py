@@ -129,8 +129,8 @@ class CacheableQualysObject(object):
         tag names on elements.  This makes creating parsers easier for
         this particular API. '''
         # DEBUG
-        #        logger.debug(pprint.pformat(elem))
-        #        logger.debug(pprint.pformat(param_map))
+        #        #logger.debug(pprint.pformat(elem))
+        #        #logger.debug(pprint.pformat(param_map))
         # TODO at some point make this a set/union funciton rather than
         # iterative
         # handle attributes
@@ -193,8 +193,7 @@ class CacheableQualysObject(object):
                     setattr(self, attrname,
                             attrtype(elem=child, attrname=attrname))
                 except:
-                    logger.error('Unknown element handler type.\r\t' + \
-                                 'Type: %s' % attrtype)
+                    logger.error('Unknown element handler type. %s' % attrtype)
 
 
 class VulnInfo(CacheableQualysObject):
@@ -979,7 +978,7 @@ class AssetGroupList(CacheableQualysObject):
         kwargs['param_map'].update({
             'ASSET_GROUP': ('asset_groups', ObjTypeList(AssetGroup)),
         })
-        # logger.debug(lxml.etree.tostring(kwargs.get('elem', None)))
+        # #logger.debug(lxml.etree.tostring(kwargs.get('elem', None)))
         super(AssetGroupList, self).__init__(*args, **kwargs)
 
     def __iter__(self):
@@ -2633,7 +2632,7 @@ class ImportBuffer(object):
         '''Place a new object into the buffer'''
         # TODO: only put an item in the queue if it is process deferred,
         # otherwise put it into a simple list to return immediately.
-        logger.debug('Adding item to results_list of type \'%s\'' % type(item))
+        #logger.debug('Adding item to results_list of type \'%s\'' % type(item))
         self.results_list.append(item)
 
     def __iter__(self):
