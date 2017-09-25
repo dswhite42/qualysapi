@@ -168,7 +168,7 @@ class BufferConsumer(multiprocessing.Process):
                 item = self.queue.get()
                 if isinstance(item, PoisonPill):
                     # logger.debug("%s: Got poison pill, ending" % self.name)
-                    self.results_queue.put(rval)
+                    self.results_queue.put(item)
                     self.queue.task_done()
                     return
                     # the base class just logs this stuff
