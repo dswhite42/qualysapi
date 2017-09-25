@@ -168,6 +168,7 @@ class BufferConsumer(multiprocessing.Process):
                 item = self.queue.get()
                 if isinstance(item, PoisonPill):
                     # logger.debug("%s: Got poison pill, ending" % self.name)
+                    self.results_queue.put(rval)
                     self.queue.task_done()
                     return
                     # the base class just logs this stuff
@@ -382,6 +383,8 @@ class MPQueueImportBuffer(QueueImportBuffer):
                 try:
                     # logger.debug("results_queue length: %s" % self.results_queue.qsize())
                     itm = self.results_queue.get()
+                    if isinstance(itm, PoisonPill):
+                        break
                     # if isinstance(itm, Host):
                     # logger.debug("finished %s" % str(itm.id))
                     self.results_list.append(itm)
