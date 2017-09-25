@@ -904,11 +904,11 @@ parser.')
                         id_min_tmp = int(id_min_tmp)
                         if id_min_tmp > prev_id_min:
                             id_min = id_min_tmp
-                            #logger.debug("ID_MIN: %s" % id_min)
+                            logger.debug("ID_MIN: %s" % id_min)
                             break
                     except:
                         break
-        return self.finish()
+        return 
 
     def iterativeHostDetectionQuery(self, **kwargs):
         """iterativehostDetectionQuery

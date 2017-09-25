@@ -167,7 +167,7 @@ class BufferConsumer(multiprocessing.Process):
                 ##logger.debug("%s: queue size:%s" % (self.name, self.queue.qsize()))
                 item = self.queue.get()
                 if isinstance(item, PoisonPill):
-                    # logger.debug("%s: Got poison pill, ending" % self.name)
+                    logger.debug("%s: Got poison pill, ending" % self.name)
                     self.results_queue.put(item)
                     self.queue.task_done()
                     return
@@ -378,13 +378,20 @@ class MPQueueImportBuffer(QueueImportBuffer):
             self.queue.join()
             # get everything on the results queue right now.
 
-
+            pill_count = 0
             while True:
                 try:
                     # logger.debug("results_queue length: %s" % self.results_queue.qsize())
                     itm = self.results_queue.get()
                     if isinstance(itm, PoisonPill):
-                        break
+                        pill_count = pill_count + 1
+                    if pill_count == self.max_consumers:
+                        del self.running[:]
+                        if self.callback:
+                            return self.callback(self.results_list)
+                        self.results_list.append(itm)
+                        self.results_queue.task_done()
+                        return self.results_list
                     # if isinstance(itm, Host):
                     # logger.debug("finished %s" % str(itm.id))
                     self.results_list.append(itm)
@@ -402,7 +409,7 @@ class MPQueueImportBuffer(QueueImportBuffer):
                     break
                 except Exception as e:
                     # general thread exception.
-                    logger.error('%s exception: %s' % (self.name, e))
+                    logger.error('exception: %s' % e)
                     # TODO: continue trying/trap exceptions?
                     raise
             del self.running[:]
@@ -918,7 +925,7 @@ class QGSMPActions(QGActions):
         for csmr in self.import_buffer.running:
             self.import_buffer.queueAdd(PoisonPill())
         results = self.import_buffer.finish(block=True)
-        # logger.debug("Checking results")
+        logger.debug("Checking results")
         self.checkResults(results)
 
         # special case: report encapsulization...
@@ -1003,6 +1010,7 @@ class QGSMPActions(QGActions):
         self.import_buffer = parse_buffer
 
     def finish(self):
+        print("Finishing")
         if self.import_buffer:
             return self.import_buffer.finish(block=True)
         else:
