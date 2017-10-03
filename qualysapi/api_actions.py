@@ -713,7 +713,7 @@ parser.')
                                       'ASSET_GROUP_LIST': AssetGroupList,
                                       'WARNING': AssetWarning
                                   },
-                                  **kwargs)[0]
+                                  **kwargs)[0].asset_groups
 
     def addAssetGroup(self, title, **kwargs):
         optional_params = [
@@ -729,7 +729,7 @@ parser.')
             key: kwargs.get(key, default) for (key, default) in
             optional_params if kwargs.get(key, default) is not None
         }
-        self.request(call, data=params)
+        return self.request(call, data=params)
 
     def editAssetGroup(self, id, **kwargs):
         optional_params = [
@@ -748,7 +748,7 @@ parser.')
             key: kwargs.get(key, default) for (key, default) in
             optional_params if kwargs.get(key, default) is not None
         }
-        self.request(call, data=params)
+        return self.request(call, data=params)
 
     def deleteAssetGroup(self, id, **kwargs):
         optional_params = [
@@ -762,7 +762,7 @@ parser.')
             key: kwargs.get(key, default) for (key, default) in
             optional_params if kwargs.get(key, default) is not None
         }
-        self.request(call, data=params)
+        return self.request(call, data=params)
 
     def hostListQuery(self, consumer_prototype=None, **kwargs):
         """hostListQuery
@@ -811,7 +811,7 @@ parser.')
                                       'HOST': Host,
                                       'WARNING': AssetWarning,
                                   },
-                                  **kwargs)[0]
+                                  **kwargs)
 
     def hostDetectionQuery(self, consumer_prototype=None, **kwargs):
         """hostListQuery
@@ -869,7 +869,7 @@ parser.')
                                       'HOST': Host,
                                       'WARNING': AssetWarning,
                                   },
-                                  **kwargs)[0]
+                                  **kwargs)
 
     def scannerApplianceQuery(self, consumer_prototype=None, **kwargs):
         """scannerApplianceQuery
@@ -903,7 +903,7 @@ parser.')
                                       'APPLIANCE': Appliance,
                                       'WARNING': AssetWarning,
                                   },
-                                  **kwargs)[0]
+                                  **kwargs)
 
     def assetIterativeWrapper(self, consumer_prototype=None, max_results=0,
                               list_type_combine=None, exit=None, internal_call=None, **kwargs):
