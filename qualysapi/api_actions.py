@@ -715,7 +715,8 @@ parser.')
                                   },
                                   **kwargs)
         if len(results) == 1:
-            return results[0].asset_groups
+            if isinstance(results, AssetGroupList):
+                return results[0].asset_groups
         return results
 
     def addAssetGroup(self, title, **kwargs):
