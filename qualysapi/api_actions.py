@@ -717,7 +717,7 @@ parser.')
 
     def addAssetGroup(self, title, **kwargs):
         optional_params = [
-            ('action', 'add')
+            ('action', 'add'),
             ('title', title),
             ('echo_request', '0'),
             ('network_id', None),
@@ -733,7 +733,7 @@ parser.')
 
     def editAssetGroup(self, id, **kwargs):
         optional_params = [
-            ('action', 'edit')
+            ('action', 'edit'),
             ('id', id),
             ('title', None),
             ('echo_request', '0'),
@@ -752,7 +752,7 @@ parser.')
 
         def deleteAssetGroup(self, id, **kwargs):
             optional_params = [
-                ('action', 'delete')
+                ('action', 'delete'),
                 ('id', id),
                 ('echo_request', '0'),
             ]
