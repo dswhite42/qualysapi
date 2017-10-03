@@ -750,19 +750,19 @@ parser.')
         }
         self.request(call, data=params)
 
-        def deleteAssetGroup(self, id, **kwargs):
-            optional_params = [
-                ('action', 'delete'),
-                ('id', id),
-                ('echo_request', '0'),
-            ]
-            call = '/api/2.0/fo/asset/group/'
+    def deleteAssetGroup(self, id, **kwargs):
+        optional_params = [
+            ('action', 'delete'),
+            ('id', id),
+            ('echo_request', '0'),
+        ]
+        call = '/api/2.0/fo/asset/group/'
 
-            params = {
-                key: kwargs.get(key, default) for (key, default) in
-                optional_params if kwargs.get(key, default) is not None
-            }
-            self.request(call, data=params)
+        params = {
+            key: kwargs.get(key, default) for (key, default) in
+            optional_params if kwargs.get(key, default) is not None
+        }
+        self.request(call, data=params)
 
     def hostListQuery(self, consumer_prototype=None, **kwargs):
         """hostListQuery
