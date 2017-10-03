@@ -488,7 +488,7 @@ parser.')
                                             'VULN': QKBVuln,
                                             'WARNING': AssetWarning,
                                         })
-        return self.finish()
+        return result[0]
 
     def listReportTemplates(self):
         '''Load a list of report templates'''
@@ -713,7 +713,7 @@ parser.')
                                       'ASSET_GROUP_LIST': AssetGroupList,
                                       'WARNING': AssetWarning
                                   },
-                                  **kwargs)
+                                  **kwargs)[0]
 
     def addAssetGroup(self, title, **kwargs):
         optional_params = [
@@ -811,7 +811,7 @@ parser.')
                                       'HOST': Host,
                                       'WARNING': AssetWarning,
                                   },
-                                  **kwargs)
+                                  **kwargs)[0]
 
     def hostDetectionQuery(self, consumer_prototype=None, **kwargs):
         """hostListQuery
@@ -869,7 +869,7 @@ parser.')
                                       'HOST': Host,
                                       'WARNING': AssetWarning,
                                   },
-                                  **kwargs)
+                                  **kwargs)[0]
 
     def scannerApplianceQuery(self, consumer_prototype=None, **kwargs):
         """scannerApplianceQuery
@@ -903,7 +903,7 @@ parser.')
                                       'APPLIANCE': Appliance,
                                       'WARNING': AssetWarning,
                                   },
-                                  **kwargs)
+                                  **kwargs)[0]
 
     def assetIterativeWrapper(self, consumer_prototype=None, max_results=0,
                               list_type_combine=None, exit=None, internal_call=None, **kwargs):
