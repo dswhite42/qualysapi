@@ -488,7 +488,7 @@ parser.')
                                             'VULN': QKBVuln,
                                             'WARNING': AssetWarning,
                                         })
-        return result[0]
+        return result
 
     def listReportTemplates(self):
         '''Load a list of report templates'''
