@@ -746,6 +746,8 @@ parser.')
             ('tag_set_include', None),  #: {value}
             ('tag_set_exclude', None),  #: {value}
             ('show_tags', None),  #: {0|1}
+            ('max_days_since_last_vm_scan', None),  #: {value}
+            ('max_days_since_detection_updated', None),
         ]
         call = '/api/2.0/fo/asset/host/'
         params = {
