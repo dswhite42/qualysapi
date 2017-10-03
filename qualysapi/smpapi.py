@@ -389,7 +389,8 @@ class MPQueueImportBuffer(QueueImportBuffer):
                         del self.running[:]
                         if self.callback:
                             return self.callback(self.results_list)
-                        self.results_list.append(itm)
+                        if not isinstance(itm, PoisonPill):
+                            self.results_list.append(itm)
                         self.results_queue.task_done()
                         return self.results_list
                     # if isinstance(itm, Host):
