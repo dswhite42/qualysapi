@@ -715,7 +715,7 @@ parser.')
                                   },
                                   **kwargs)
         if len(results) == 1:
-            if isinstance(results, AssetGroupList):
+            if isinstance(results[0], AssetGroupList):
                 return results[0].asset_groups
         return results
 
