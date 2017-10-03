@@ -707,13 +707,16 @@ parser.')
         }
         # return 1 or None.  API doesn't allow multiple.  Also make sure it's a
         # report and not a SimpleReturn (which can happen)
-        return self.parseResponse(source=call, data=params,
+        results = self.parseResponse(source=call, data=params,
                                   consumer_prototype=consumer_prototype,
                                   obj_elem_map={
                                       'ASSET_GROUP_LIST': AssetGroupList,
                                       'WARNING': AssetWarning
                                   },
-                                  **kwargs)[0].asset_groups
+                                  **kwargs)[0]
+        if isinstance(results, AssetGroupList):
+            return results.asset_groups
+        return results
 
     def addAssetGroup(self, title, **kwargs):
         optional_params = [
