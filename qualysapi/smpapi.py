@@ -394,7 +394,8 @@ class MPQueueImportBuffer(QueueImportBuffer):
                         return self.results_list
                     # if isinstance(itm, Host):
                     # logger.debug("finished %s" % str(itm.id))
-                    self.results_list.append(itm)
+                    if not isinstance(itm, PoisonPill):
+                        self.results_list.append(itm)
                     self.results_queue.task_done()
                     # TODO: implement this
                     #             while not self.results_queue.empty():
