@@ -713,9 +713,10 @@ parser.')
                                       'ASSET_GROUP_LIST': AssetGroupList,
                                       'WARNING': AssetWarning
                                   },
-                                  **kwargs)[0]
-        if isinstance(results, AssetGroupList):
-            return results.asset_groups
+                                  **kwargs)
+        if len(results == 1):
+            if isinstance(results, AssetGroupList):
+                return results[0].asset_groups
         return results
 
     def addAssetGroup(self, title, **kwargs):
