@@ -715,6 +715,55 @@ parser.')
                                   },
                                   **kwargs)
 
+    def addAssetGroup(self, title, **kwargs):
+        optional_params = [
+            ('action', 'add')
+            ('title', title),
+            ('echo_request', '0'),
+            ('network_id', None),
+            ('ips', None),
+        ]
+        call = '/api/2.0/fo/asset/group/'
+
+        params = {
+            key: kwargs.get(key, default) for (key, default) in
+            optional_params if kwargs.get(key, default) is not None
+        }
+        self.request(call, data=params)
+
+    def editAssetGroup(self, id, **kwargs):
+        optional_params = [
+            ('action', 'edit')
+            ('id', id),
+            ('title', None),
+            ('echo_request', '0'),
+            ('network_id', None),
+            ('add_ips', None),
+            ('remove_ips', None),
+            ('set_ips', None),
+        ]
+        call = '/api/2.0/fo/asset/group/'
+
+        params = {
+            key: kwargs.get(key, default) for (key, default) in
+            optional_params if kwargs.get(key, default) is not None
+        }
+        self.request(call, data=params)
+
+        def deleteAssetGroup(self, id, **kwargs):
+            optional_params = [
+                ('action', 'delete')
+                ('id', id),
+                ('echo_request', '0'),
+            ]
+            call = '/api/2.0/fo/asset/group/'
+
+            params = {
+                key: kwargs.get(key, default) for (key, default) in
+                optional_params if kwargs.get(key, default) is not None
+            }
+            self.request(call, data=params)
+
     def hostListQuery(self, consumer_prototype=None, **kwargs):
         """hostListQuery
 
