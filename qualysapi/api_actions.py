@@ -714,7 +714,7 @@ parser.')
                                       'WARNING': AssetWarning
                                   },
                                   **kwargs)
-        if len(results == 1):
+        if len(results) == 1:
             if isinstance(results, AssetGroupList):
                 return results[0].asset_groups
         return results
