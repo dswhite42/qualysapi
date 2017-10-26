@@ -578,6 +578,26 @@ parser.')
         data = {}
         return self.parseResponse(source=call, data=data)
 
+    def listScheduledScans(self, consumer_prototype=None, **kwargs):
+        call = '/api/2.0/fo/schedule/scan/'
+        optional_params = [
+            ('action', 'list'),
+            ('echo_request', '0'),
+            ('id', None),
+            ('active', None),
+        ]
+        params = {
+            key: kwargs.get(key, default) for (key, default) in
+            optional_params if kwargs.get(key, default) is not None
+        }
+        return self.parseResponse(source=call, data=params, http_method='get',
+                                  consumer_prototype=consumer_prototype,
+                                  obj_elem_map={
+                                      'SCAN': Scan,
+                                      'WARNING': AssetWarning,
+                                  },
+                                  **kwargs)
+
     def listScans(self, consumer_prototype=None, **kwargs):
         # 'launched_after' parameter accepts a date in the format: YYYY-MM-DD
         # 'state' parameter accepts "Running", "Paused", "Canceled", "Finished", "Error", "Queued", and "Loading".
@@ -708,12 +728,12 @@ parser.')
         # return 1 or None.  API doesn't allow multiple.  Also make sure it's a
         # report and not a SimpleReturn (which can happen)
         results = self.parseResponse(source=call, data=params,
-                                  consumer_prototype=consumer_prototype,
-                                  obj_elem_map={
-                                      'ASSET_GROUP_LIST': AssetGroupList,
-                                      'WARNING': AssetWarning
-                                  },
-                                  **kwargs)
+                                     consumer_prototype=consumer_prototype,
+                                     obj_elem_map={
+                                         'ASSET_GROUP_LIST': AssetGroupList,
+                                         'WARNING': AssetWarning
+                                     },
+                                     **kwargs)
         if len(results) == 1:
             if isinstance(results[0], AssetGroupList):
                 return results[0].asset_groups
@@ -963,7 +983,7 @@ parser.')
                             break
                     except:
                         break
-        return 
+        return
 
     def iterativeHostDetectionQuery(self, **kwargs):
         """iterativehostDetectionQuery
