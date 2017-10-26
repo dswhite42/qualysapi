@@ -275,7 +275,7 @@ class VulnInfo(CacheableQualysObject):
             param_map = kwargs.pop('param_map', {})
         kwargs['param_map'] = param_map
         kwargs['param_map'].update({
-            'QID': ('id', unicode_str),
+            'QID': ('qid', unicode_str),
             'TYPE': ('type', unicode_str),
             'PORT': ('port', unicode_str),
             'SERVICE': ('service', unicode_str),
@@ -1591,7 +1591,7 @@ class QKBVuln(CacheableQualysObject):
     '''
     A class respresentation of a Qualys Knowledge Base entry.
     Properties:
-        :property id: the qualys id
+        :property qid: the qualys id
         :property vtype: the qualys vuln type identifier
         :property severity: the qualys severity
         :property title: a human readable title-length description of the vulnerability
@@ -1817,7 +1817,7 @@ class QKBVuln(CacheableQualysObject):
                 param_map = kwargs.pop('param_map', {})
             kwargs['param_map'] = param_map
             kwargs['param_map'].update({
-                'QID': ('id', unicode_str),
+                'QID': ('qid', unicode_str),
                 'VULN_TYPE': ('vtype', unicode_str),
                 'SEVERITY_LEVEL': ('severity', unicode_str),
                 'TITLE': ('title', unicode_str),
