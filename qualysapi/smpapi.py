@@ -922,7 +922,9 @@ class QGSMPActions(QGActions):
                     self.import_buffer.queueAdd(item)
                     # elem.clear() #don't fill up a dom we don't need.
         except lxml.etree.XMLSyntaxError:
+            import traceback
             logger.warning('Error while parsing response')
+            logger.warn(traceback.format_exc())
 
         for csmr in self.import_buffer.running:
             self.import_buffer.queueAdd(PoisonPill())
