@@ -493,6 +493,7 @@ class Host(CacheableQualysObject):
     owner = None
     qg_hostid = None
     user_def = None
+    active_kernel = None
 
     @property
     def last_scan_datetime(self):
@@ -565,6 +566,7 @@ class Host(CacheableQualysObject):
             'OPERATING_SYSTEM': ('operating_system', unicode_str),
             'OS': ('operating_system', unicode_str),
             'OS_CPE': ('os_cpe', unicode_str),
+            'AFFECT_RUNNING_KERNEL': ('active_kernel', unicode_str),
             'IP_INTERFACES': ('interfaces', ObjTypeList(IP,
                                                         xpath='IP')),
             'ASSET_GROUPS': ('asset_groups', ObjTypeList(unicode_str,
