@@ -378,6 +378,61 @@ parser.')
                 return result
                 # None result
 
+    def searchReport(self, consumer_prototype=None, **kwargs):
+        optional_params = [
+            ('action', 'search'),
+            ('output_format', 'xml'),
+            ('tracking_method', None),
+            ('ips', None),
+            ('ips_network_id', None),
+            ('asset_group_ids', None),
+            ('asset_groups', None),
+            ('assets_in_my_network_only', None),
+            ('ec2_instance_status', None),
+            ('ec2_instance_id', None),
+            ('ec2_instance_id_modifier', None),
+            ('display_ag_titles', None),
+            ('ports', None),
+            ('services', None),
+            ('qids', None),
+            ('qid_with_text', None),
+            ('qid_with_modifier', None),
+            ('use_tags', None),
+            ('tag_set_by', None),
+            ('tag_include_selector', None),
+            ('tag_exclude_selector', None),
+            ('tag_set_include', None),
+            ('tag_set_exclude', None),
+            ('first_found_days', None),
+            ('first_found_modifier', None),
+            ('last_vm_scan_days', None),
+            ('last_vm_scan_modifier', None),
+            ('last_pc_scan_days', None),
+            ('last_pc_scan_modifier', None),
+            ('dns_name', None),
+            ('dns_modifier', None),
+            ('netbios_name', None),
+            ('netbios_modifier', None),
+            ('os_cpe_name', None),
+            ('os_cpe_modifier', None),
+            ('os_name', None),
+            ('os_modifier', None)
+        ]
+        call = '/api/2.0/fo/report/asset/'
+        params = {
+            key: kwargs.get(key, default) for (key, default) in
+            optional_params if kwargs.get(key, default) is not None
+        }
+        # return 1 or None.  API doesn't allow multiple.  Also make sure it's a
+        # report and not a SimpleReturn (which can happen)
+        return self.parseResponse(source=call, data=params,
+                                  consumer_prototype=consumer_prototype,
+                                  obj_elem_map={
+                                      'HOST': Host,
+                                      'WARNING': AssetWarning,
+                                  },
+                                  **kwargs)
+
     def queryQKB(self, consumer_prototype=None, **kwargs):
         '''
         Pulls down a set of Qualys Knowledge Base entries in XML and hands them
