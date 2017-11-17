@@ -984,6 +984,23 @@ parser.')
                                   },
                                   **kwargs)
 
+    def createScanner(self, name, **kwargs):
+        optional_params = [
+            ('action', 'create'),
+            ('name', name),
+            ('echo_request', '0'),
+            ('polling_interval', None),
+            ('asset_group_id', None),
+        ]
+        call = '/api/2.0/fo/appliance/'
+
+        params = {
+            key: kwargs.get(key, default) for (key, default) in
+            optional_params if kwargs.get(key, default) is not None
+        }
+        #return self.request(call, data=params)
+        return self.parseResponse(source=call, data=params, obj_elem_map={'APPLIANCE': ApplianceResponse, 'SIMPLE_RETURN': SimpleReturn})
+
     def assetIterativeWrapper(self, consumer_prototype=None, max_results=0,
                               list_type_combine=None, exit=None, internal_call=None, **kwargs):
         """assetIterativeWrapper

@@ -2142,8 +2142,75 @@ class RequestEcho(CacheableQualysObject):
         super(RequestEcho, self).__init__(*args, **kwargs)
 
 
-class SimpleReturn():
-    '''Handle request/response elements from a SIMPLE_RETURN
+class ResponseItem(CacheableQualysObject):
+    key = None
+    value = None
+
+    def __init__(self, *args, **kwargs):
+        if 'elem' in kwargs or 'xml' in kwargs:
+            param_map = {}
+            if 'param_map' in kwargs:
+                param_map = kwargs.pop('param_map', {})
+            kwargs['param_map'] = param_map
+            kwargs['param_map'].update({
+                'KEY': ('key', unicode_str),
+                'value': ('value', unicode_str),
+            })
+        else:
+            self.key = kwargs.pop('key', None)
+            self.value = kwargs.pop('value', None)
+        super(ResponseItem, self).__init__(*args, **kwargs)
+
+
+class Response(CacheableQualysObject):
+    reponse_time = None
+    response_text = None
+    response_code = None
+
+    def __init__(self, *args, **kwargs):
+        param_map = {}
+        if 'param_map' in kwargs:
+            param_map = kwargs.pop('param_map', {})
+        kwargs['param_map'] = param_map
+        kwargs['param_map'].update({
+            'DATETIME': ('reponse_time', unicode_str),
+            'CODE': ('response_code', unicode_str),
+            'TEXT': ('response_text', unicode_str)
+        })
+        super(Response, self).__init__(*args, **kwargs)
+
+class ApplianceResponse(CacheableQualysObject):
+    id = None
+    friendly_name = None
+    activation_code = None
+    remaining_qvsa_licenses = None
+
+    def __init__(self, *args, **kwargs):
+        param_map = {}
+        if 'param_map' in kwargs:
+            param_map = kwargs.pop('param_map', {})
+        kwargs['param_map'] = param_map
+        kwargs['param_map'].update({
+            'ID': ('id', unicode_str),
+            'FRIENDLY_NAME': ('friendly_name', unicode_str),
+            'ACTIVATION_CODE': ('activation_code', unicode_str),
+            'REMAINING_QVSA_LICENSES': ('remaining_qvsa_licenses', unicode_str),
+        })
+        super(ApplianceResponse, self).__init__(*args, **kwargs)
+
+class SimpleReturn(CacheableQualysObject):
+    '''A wrapper for qualys responses to api commands (as opposed to requests).
+
+    Properties:
+    :property response_time:
+        Response header timestamp.
+    :property response_text:
+        Response header text.
+    :property response_items:
+        A list of key/value pairs returned with the header.  This
+    isn't private, but it should be considered protected.  Mostly.
+
+    DTD associated with this class:
     ::
        <!-- QUALYS SIMPLE_RETURN DTD -->
        <!ELEMENT SIMPLE_RETURN (REQUEST?, RESPONSE)>
@@ -2164,124 +2231,11 @@ class SimpleReturn():
        <!ELEMENT ITEM_LIST (ITEM+)>
        <!ELEMENT ITEM (KEY, VALUE*)>
     '''
-
-    class SimpleReturnResponse(CacheableQualysObject):
-        '''A wrapper for qualys responses to api commands (as opposed to requests).
-
-        Properties:
-        :property response_time:
-            Response header timestamp.
-        :property response_text:
-            Response header text.
-        :property response_items:
-            A list of key/value pairs returned with the header.  This
-        isn't private, but it should be considered protected.  Mostly.
-
-        DTD associated with this class:
-        ::
-           <!-- QUALYS SIMPLE_RETURN DTD -->
-           <!ELEMENT SIMPLE_RETURN (REQUEST?, RESPONSE)>
-           <!ELEMENT REQUEST (DATETIME, USER_LOGIN, RESOURCE, PARAM_LIST?,
-                              POST_DATA?)>
-           <!ELEMENT DATETIME (#PCDATA)>
-           <!ELEMENT USER_LOGIN (#PCDATA)>
-           <!ELEMENT RESOURCE (#PCDATA)>
-           <!ELEMENT PARAM_LIST (PARAM+)>
-           <!ELEMENT PARAM (KEY, VALUE)>
-           <!ELEMENT KEY (#PCDATA)>
-           <!ELEMENT VALUE (#PCDATA)>
-           <!-- If specified, POST_DATA will be urlencoded -->
-           <!ELEMENT POST_DATA (#PCDATA)>
-           <!ELEMENT RESPONSE (DATETIME, CODE?, TEXT, ITEM_LIST?)>
-           <!ELEMENT CODE (#PCDATA)>
-           <!ELEMENT TEXT (#PCDATA)>
-           <!ELEMENT ITEM_LIST (ITEM+)>
-           <!ELEMENT ITEM (KEY, VALUE*)>
-        '''
-        reponse_time = None
-        response_text = None
-        response_code = None
-        response_items = {}
-        __is_error = False
-        __err_msg = None
-
-        class ResponseItem(CacheableQualysObject):
-            key = None
-            value = None
-
-            def __init__(self, *args, **kwargs):
-                if 'elem' in kwargs or 'xml' in kwargs:
-                    param_map = {}
-                    if 'param_map' in kwargs:
-                        param_map = kwargs.pop('param_map', {})
-                    kwargs['param_map'] = param_map
-                    kwargs['param_map'].update({
-                        'KEY': ('key', unicode_str),
-                        'value': ('value', unicode_str),
-                    })
-                else:
-                    self.key = kwargs.pop('key', None)
-                    self.value = kwargs.pop('value', None)
-                super(ResponseItem, self).__init__(*args, **kwargs)
-
-        def __init__(self, *args, **kwargs):
-            # we want to pass our child to the constructor...
-            if 'elem' in kwargs or 'xml' in kwargs:
-                param_map = {}
-                if 'param_map' in kwargs:
-                    param_map = kwargs.pop('param_map', {})
-                kwargs['param_map'] = param_map
-                kwargs['param_map'].update({
-                    'DATETIME': ('reponse_time', unicode_str),
-                    'CODE': ('response_code', unicode_str),
-                    'TEXT': ('response_text', unicode_str),
-                    'ITEM_LIST': ('items', ObjTypeList(self.ResponseItem,
-                                                       xpath='ITEM')),
-                })
-            else:
-                self.reponse_time = kwargs.pop('DATETIME', None)
-                self.response_code = kwargs.pop('CODE', None)
-                self.response_text = kwargs.pop('TEXT', None)
-                self.response_items = dict(((item.KEY, item.VALUE) for item in \
-                                            kwargs.pop('ITEM_LIST', [])))
-            super(SimpleReturnResponse, self).__init__(*args, **kwargs)
-            # do a self-check to engage the framework
-            self.checkStatus()
-
-        def checkStatus(self, raiseApiException=False):
-            '''A wrapper around the response status attribute that should handle
-            all of the various api responses the same.'''
-            if self.response_text and 'Missing required parameter' in \
-                    self.response_text:
-                self.__is_error = True
-                self.__err_msg = 'A required parameter was missing from the API  \
-                    request'
-
-        def hasItem(self, key):
-            '''Check for a key/value pair'''
-            return True if key in self.response_items else False
-
-        def getItemValue(self, key, default=None):
-            '''hook for dict.get to callers'''
-            return self.response_items.get(key, default)
-
-        def getItemKeys(self):
-            '''hook for dict.keys to callers'''
-            return self.response_items.keys()
-
-        def wasSuccessful(self):
-            '''A bit more complicated than a simple 200 response, this method
-            attempts to unify multiple types of responses into a unified
-            success/fail test.  Child classes can extend this for additional
-            conditions that include response codes, different response texts and
-            anything else useful for a unilateral true/false.
-            '''
-            return True if not self.__is_error else False
-
-        def raiseAPIExceptions(self):
-            ''' raise any Qualys API exceptions '''
-            if self.__is_error:
-                raise exceptions.QualysException(self.__err_msg)
+    response = None
+    appliance = None
+    items = None
+    __is_error = False
+    __err_msg = None
 
     def __init__(self, *args, **kwargs):
         param_map = {}
@@ -2289,10 +2243,47 @@ class SimpleReturn():
             param_map = kwargs.pop('param_map', {})
         kwargs['param_map'] = param_map
         kwargs['param_map'].update({
-            'RESPONSE': ('response', self.SimpleReturnResopnse),
-            'REQUEST': ('request', RequestEcho),
+            'RESPONSE': ('response', Response),
+            'APPLIANCE': ('appliance', ApplianceResponse),
+            'ITEM_LIST': ('items', ObjTypeList(ResponseItem,
+                                               xpath='ITEM')),
         })
         super(SimpleReturn, self).__init__(*args, **kwargs)
+
+    def checkStatus(self, raiseApiException=False):
+        '''A wrapper around the response status attribute that should handle
+        all of the various api responses the same.'''
+        if self.response.response_text and 'Missing required parameter' in \
+                self.response.response_text:
+            self.__is_error = True
+            self.__err_msg = 'A required parameter was missing from the API  \
+                    request'
+
+    def hasItem(self, key):
+        '''Check for a key/value pair'''
+        return True if key in self.response_items else False
+
+    def getItemValue(self, key, default=None):
+        '''hook for dict.get to callers'''
+        return self.response_items.get(key, default)
+
+    def getItemKeys(self):
+        '''hook for dict.keys to callers'''
+        return self.response_items.keys()
+
+    def wasSuccessful(self):
+        '''A bit more complicated than a simple 200 response, this method
+        attempts to unify multiple types of responses into a unified
+        success/fail test.  Child classes can extend this for additional
+        conditions that include response codes, different response texts and
+        anything else useful for a unilateral true/false.
+        '''
+        return True if not self.__is_error else False
+
+    def raiseAPIExceptions(self):
+        ''' raise any Qualys API exceptions '''
+        if self.__is_error:
+            raise exceptions.QualysException(self.__err_msg)
 
 
 class QualysUser(CacheableQualysObject):
@@ -2634,7 +2625,7 @@ class ImportBuffer(object):
         '''Place a new object into the buffer'''
         # TODO: only put an item in the queue if it is process deferred,
         # otherwise put it into a simple list to return immediately.
-        #logger.debug('Adding item to results_list of type \'%s\'' % type(item))
+        # logger.debug('Adding item to results_list of type \'%s\'' % type(item))
         self.results_list.append(item)
 
     def __iter__(self):
