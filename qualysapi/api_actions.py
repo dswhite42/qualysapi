@@ -1,4 +1,6 @@
 from lxml import objectify, etree
+from lxml.etree import fromstring, tostring
+import xmljson
 from qualysapi.api_objects import *
 from qualysapi.exceptions import *
 from qualysapi.util import date_param_format, qualys_datetime_to_python
@@ -998,8 +1000,196 @@ parser.')
             key: kwargs.get(key, default) for (key, default) in
             optional_params if kwargs.get(key, default) is not None
         }
-        #return self.request(call, data=params)
-        return self.parseResponse(source=call, data=params, obj_elem_map={'APPLIANCE': ApplianceResponse, 'SIMPLE_RETURN': SimpleReturn})
+        # return self.request(call, data=params)
+        return self.parseResponse(source=call, data=params,
+                                  obj_elem_map={'APPLIANCE': ApplianceResponse, 'SIMPLE_RETURN': SimpleReturn})
+
+    def deleteScanner(self, id, **kwargs):
+        optional_params = [
+            ('action', 'delete'),
+            ('id', id),
+        ]
+        call = '/api/2.0/fo/appliance/'
+
+        params = {
+            key: kwargs.get(key, default) for (key, default) in
+            optional_params if kwargs.get(key, default) is not None
+        }
+        # return self.request(call, data=params)
+        return self.parseResponse(source=call, data=params,
+                                  obj_elem_map={'APPLIANCE': ApplianceResponse, 'SIMPLE_RETURN': SimpleReturn})
+
+    def createConnector(self, connector_name, auth_id, tag_ids=[], region_codes=[]):
+        # create XML
+        service_request = etree.Element('ServiceRequest')
+        data = etree.Element('data')
+        service_request.append(data)
+        connector = etree.Element('AwsAssetDataConnector')
+        data.append(connector)
+        name = etree.Element('name')
+        name.text = connector_name
+        connector.append(name)
+        default_tags = etree.Element('defaultTags')
+        connector.append(default_tags)
+        set = etree.Element('set')
+        default_tags.append(set)
+        for tag_id in tag_ids:
+            tag_simple = etree.Element('TagSimple')
+            set.append(tag_simple)
+            id = etree.Element('id')
+            id.text = str(tag_id)
+            tag_simple.append(id)
+        activation = etree.Element('activation')
+        connector.append(activation)
+        activation_set = etree.Element('set')
+        activation.append(activation_set)
+        activation_module = etree.Element('ActivationModule')
+        activation_module.text = 'VM'
+        activation_set.append(activation_module)
+        auth_record = etree.Element('authRecord')
+        connector.append(auth_record)
+        auth_id_tag = etree.Element('id')
+        auth_id_tag.text = str(auth_id)
+        auth_record.append(auth_id_tag)
+        if not len(region_codes):
+            all_regions = etree.Element('allRegions')
+            all_regions.text = 'true'
+            connector.append(all_regions)
+        else:
+            endpoints = etree.Element('endpoints')
+            connector.append(endpoints)
+            endpoint_set = etree.Element('set')
+            endpoints.append(endpoint_set)
+            for region in region_codes:
+                aws_endpoint = etree.Element('AwsEndpointSimple')
+                endpoint_set.append(aws_endpoint)
+                region_code = etree.Element('regionCode')
+                region_code.text = region
+                aws_endpoint.append(region_code)
+
+        call = '/create/am/awsassetdataconnector/'
+        return self.request(call, data=etree.tostring(service_request))
+
+    def searchTags(self, **kwargs):
+        optional_params = [
+            ('name', None),
+            ('id', None),
+            ('ruleType', None),
+            ('parentTagId', None),
+            ('color', None),
+            ('name_operator', 'EQUALS'),
+            ('id_operator', 'EQUALS'),
+            ('ruleType_operator', 'EQUALS'),
+            ('parentTagId_operator', 'EQUALS'),
+            ('color_operator', 'EQUALS')
+        ]
+        call = '/search/am/tag/'
+
+        params = {
+            key: kwargs.get(key, default) for (key, default) in
+            optional_params if kwargs.get(key, default) is not None
+        }
+        service_request = etree.Element('ServiceRequest')
+        filters = etree.Element('filters')
+        service_request.append(filters)
+        for field, value in params.items():
+            if not '_operator' in field:
+                criteria = etree.Element('Criteria')
+                criteria.attrib['field'] = field
+                criteria.attrib['operator'] = params['%s_operator' % field]
+                criteria.text = value
+                filters.append(criteria)
+        xml = fromstring(self.request(call, data=etree.tostring(service_request)))
+        return xmljson.parker.data(xml)
+
+    def searchAWSAuth(self, **kwargs):
+        optional_params = [
+            ('name', None),
+            ('id', None),
+            ('description', None),
+            ('created', None),
+            ('modified', None),
+            ('name_operator', 'EQUALS'),
+            ('id_operator', 'EQUALS'),
+            ('description_operator', 'EQUALS'),
+            ('created_operator', 'EQUALS'),
+            ('modified_operator', 'EQUALS')
+        ]
+        call = '/search/am/awsauthrecord'
+
+        params = {
+            key: kwargs.get(key, default) for (key, default) in
+            optional_params if kwargs.get(key, default) is not None
+        }
+        service_request = etree.Element('ServiceRequest')
+        filters = etree.Element('filters')
+        service_request.append(filters)
+        for field, value in params.items():
+            if not '_operator' in field:
+                criteria = etree.Element('Criteria')
+                criteria.attrib['field'] = field
+                criteria.attrib['operator'] = params['%s_operator' % field]
+                criteria.text = value
+                filters.append(criteria)
+        xml = fromstring(self.request(call, data=etree.tostring(service_request)))
+        return xmljson.parker.data(xml)
+
+    def deleteAWSAuth(self, **kwargs):
+        optional_params = [
+            ('name', None),
+            ('id', None),
+            ('description', None),
+            ('created', None),
+            ('modified', None),
+            ('name_operator', 'EQUALS'),
+            ('id_operator', 'EQUALS'),
+            ('description_operator', 'EQUALS'),
+            ('created_operator', 'EQUALS'),
+            ('modified_operator', 'EQUALS')
+        ]
+        call = '/delete/am/awsauthrecord'
+
+        params = {
+            key: kwargs.get(key, default) for (key, default) in
+            optional_params if kwargs.get(key, default) is not None
+        }
+        service_request = etree.Element('ServiceRequest')
+        filters = etree.Element('filters')
+        service_request.append(filters)
+        for field, value in params.items():
+            if not '_operator' in field:
+                criteria = etree.Element('Criteria')
+                criteria.attrib['field'] = field
+                criteria.attrib['operator'] = params['%s_operator' % field]
+                criteria.text = value
+                filters.append(criteria)
+        xml = fromstring(self.request(call, data=etree.tostring(service_request)))
+        return xmljson.parker.data(xml)
+
+    def createAWSAuth(self, name, access_key, secret_key, **kwargs):
+        optional_params = [
+            ('name', name),
+            ('accessKeyId', access_key),
+            ('secretKey', secret_key),
+            ('description', None),
+        ]
+        call = 'create/am/awsauthrecord'
+
+        params = {
+            key: kwargs.get(key, default) for (key, default) in
+            optional_params if kwargs.get(key, default) is not None
+        }
+        service_request = etree.Element('ServiceRequest')
+        data = etree.Element('data')
+        service_request.append(data)
+        aws_auth = etree.Element('AwsAuthRecord')
+        data.append(aws_auth)
+        for k,v in params.items():
+            node = etree.Element(k)
+            node.text = v
+            aws_auth.append(node)
+        xml = fromstring(self.request(call, data=etree.tostring(service_request)))
+        return xmljson.parker.data(xml)
 
     def assetIterativeWrapper(self, consumer_prototype=None, max_results=0,
                               list_type_combine=None, exit=None, internal_call=None, **kwargs):
