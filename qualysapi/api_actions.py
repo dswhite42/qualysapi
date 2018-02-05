@@ -705,8 +705,8 @@ parser.')
         if asset_groups == "":
             parameters.pop("asset_groups")
 
-        scan_ref = objectify.fromstring(self.request(call,
-                                                     data=parameters)).RESPONSE.ITEM_LIST.ITEM[1].VALUE
+        response = self.request(call, data=parameters)
+        scan_ref = objectify.fromstring(response).RESPONSE.ITEM_LIST.ITEM[1].VALUE
 
         call = '/api/2.0/fo/scan/'
         parameters = {'action': 'list', 'scan_ref': scan_ref, 'show_status': 1,
@@ -721,10 +721,10 @@ parser.')
         except AttributeError:
             agList = []
 
-        return Scan(agList, scan.DURATION, scan.LAUNCH_DATETIME,
-                    scan.OPTION_PROFILE.TITLE, scan.PROCESSED, scan.REF,
-                    scan.STATUS, scan.TARGET, scan.TITLE, scan.TYPE,
-                    scan.USER_LOGIN)
+        return Scan(duration=scan.DURATION, launch_datetime=scan.LAUNCH_DATETIME,
+                    option_profile=scan.OPTION_PROFILE.TITLE, processed=scan.PROCESSED, ref=scan.REF,
+                    status=scan.STATUS, target=scan.TARGET, title=scan.TITLE, type=scan.TYPE,
+                    user_login=scan.USER_LOGIN)
 
     def getConnectionConfig(self):
         return self.conn.getConfig()
