@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 import pprint
 import json
 
+from requests import exceptions
+
 # smp libs
 import multiprocessing
 import threading
@@ -878,10 +880,17 @@ class QGSMPActions(QGActions):
                         'will be returned by this function.  Consumer only.')
         # select the response file-like object
         response = None
-        if isinstance(source, str):
-            response = self.stream_request(source, **kwargs)
-        else:
-            response = source
+        timeout = True
+        while timeout:
+            timeout = False
+            try:
+                if isinstance(source, str):
+                    response = self.stream_request(source, **kwargs)
+                else:
+                    response = source
+            except exceptions.Timeout:
+                print('timeout')
+                timeout = True
 
         consumer = None
         if 'consumer_prototype' in kwargs:
@@ -931,7 +940,7 @@ class QGSMPActions(QGActions):
         results = self.import_buffer.finish(block=True)
         logger.debug("Checking results")
         self.checkResults(results)
-
+        print(results)
         # special case: report encapsulization...
         return results
 

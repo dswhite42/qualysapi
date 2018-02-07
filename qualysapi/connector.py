@@ -441,7 +441,8 @@ class QGConnector:
                     auth=self.auth,
                     headers=headers,
                     proxies=self.proxies,
-                    stream=True
+                    stream=True,
+                    timeout=180
                 )
         else:
             # POST
@@ -453,7 +454,8 @@ class QGConnector:
                     auth=self.auth,
                     headers=headers,
                     proxies=self.proxies,
-                    stream=True
+                    stream=True,
+                    timeout=180
                 )
         if response is not None and response.status_code == 401:
             response.close()
