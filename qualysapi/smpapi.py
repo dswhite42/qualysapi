@@ -911,29 +911,34 @@ class QGSMPActions(QGActions):
             if not isinstance(rstub, Report):
                 raise exceptions.QualysFrameworkException('Only Report objects'
                                                           ' and subclasses can be passed to this function as reports.')
-
-        try:
-            context = etree.iterparse(response, events=('end',), huge_tree=True)
-            # optional default elem/obj mapping override
-            local_elem_map = kwargs.get('obj_elem_map', queue_elem_map)
-            # logger.debug(local_elem_map)
-            for event, elem in context:
-                # Use QName to avoid specifying or stripping the namespace, which we don't need
-                if exit.is_set():
-                    logger.info('Exit event caused immediate return.')
-                    break
-                stag = etree.QName(elem.tag).localname.upper()
-                if stag in local_elem_map:
-                    # logger.debug('Adding type "%s" to queue.' % (local_elem_map[stag]))
-                    item = local_elem_map[stag](elem=elem,
-                                                report_stub=rstub)
-                    # #logger.debug("Adding %s to queue" % str(item.id))
-                    self.import_buffer.queueAdd(item)
-                    # elem.clear() #don't fill up a dom we don't need.
-        except lxml.etree.XMLSyntaxError:
-            import traceback
-            logger.warning('Error while parsing response')
-            logger.warn(traceback.format_exc())
+        timeout = True
+        while timeout:
+            timeout = False
+            try:
+                context = etree.iterparse(response, events=('end',), huge_tree=True)
+                # optional default elem/obj mapping override
+                local_elem_map = kwargs.get('obj_elem_map', queue_elem_map)
+                # logger.debug(local_elem_map)
+                for event, elem in context:
+                    # Use QName to avoid specifying or stripping the namespace, which we don't need
+                    if exit.is_set():
+                        logger.info('Exit event caused immediate return.')
+                        break
+                    stag = etree.QName(elem.tag).localname.upper()
+                    if stag in local_elem_map:
+                        # logger.debug('Adding type "%s" to queue.' % (local_elem_map[stag]))
+                        item = local_elem_map[stag](elem=elem,
+                                                    report_stub=rstub)
+                        # #logger.debug("Adding %s to queue" % str(item.id))
+                        self.import_buffer.queueAdd(item)
+                        # elem.clear() #don't fill up a dom we don't need.
+            except lxml.etree.XMLSyntaxError:
+                import traceback
+                logger.warning('Error while parsing response')
+                logger.warn(traceback.format_exc())
+            except exceptions.Timeout:
+                print('timeout')
+                timeout = True
 
         for csmr in self.import_buffer.running:
             self.import_buffer.queueAdd(PoisonPill())
