@@ -888,7 +888,7 @@ class QGSMPActions(QGActions):
                     response = self.stream_request(source, **kwargs)
                 else:
                     response = source
-            except exceptions.Timeout:
+            except:
                 print('timeout')
                 timeout = True
 
@@ -936,7 +936,7 @@ class QGSMPActions(QGActions):
                 import traceback
                 logger.warning('Error while parsing response')
                 logger.warn(traceback.format_exc())
-            except exceptions.Timeout:
+            except:
                 print('timeout')
                 timeout = True
 
