@@ -914,6 +914,7 @@ parser.')
             ('ag_titles', None),
             ('network_ids', None),
             ('vm_scan_since', None),  #: {date}
+            ('detection_updated_since', None),  #: {date}
             ('no_vm_scan_since', None),  #: {date}
             ('no_compliance_scan_since', None),  #: {date}]
             ('os_pattern', None),  #: {expression}
