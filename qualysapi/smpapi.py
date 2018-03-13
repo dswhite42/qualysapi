@@ -882,14 +882,15 @@ class QGSMPActions(QGActions):
         response = None
         timeout = True
         while timeout:
-            timeout = False
             try:
                 if isinstance(source, str):
                     response = self.stream_request(source, **kwargs)
                 else:
                     response = source
+                timeout = False
             except:
-                print('timeout')
+                import traceback
+                traceback.print_exc()
                 timeout = True
 
         consumer = None
@@ -913,7 +914,6 @@ class QGSMPActions(QGActions):
                                                           ' and subclasses can be passed to this function as reports.')
         timeout = True
         while timeout:
-            timeout = False
             try:
                 context = etree.iterparse(response, events=('end',), huge_tree=True)
                 # optional default elem/obj mapping override
@@ -932,12 +932,15 @@ class QGSMPActions(QGActions):
                         # #logger.debug("Adding %s to queue" % str(item.id))
                         self.import_buffer.queueAdd(item)
                         # elem.clear() #don't fill up a dom we don't need.
+                timeout = False
             except lxml.etree.XMLSyntaxError:
                 import traceback
                 logger.warning('Error while parsing response')
                 logger.warn(traceback.format_exc())
             except:
-                print('timeout')
+                print('xml error')
+                import traceback
+                traceback.print_exc()
                 timeout = True
 
         for csmr in self.import_buffer.running:
