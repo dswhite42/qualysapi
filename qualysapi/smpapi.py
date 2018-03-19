@@ -887,34 +887,26 @@ class QGSMPActions(QGActions):
                     response = self.stream_request(source, **kwargs)
                 else:
                     response = source
-                timeout = False
-            except:
-                import traceback
-                traceback.print_exc()
-                timeout = True
 
-        consumer = None
-        if 'consumer_prototype' in kwargs:
-            consumer = kwargs.pop('consumer_prototype')
-        else:
-            consumer = self.consumer_prototype
+                consumer = None
+                if 'consumer_prototype' in kwargs:
+                    consumer = kwargs.pop('consumer_prototype')
+                else:
+                    consumer = self.consumer_prototype
 
-        if self.import_buffer is None:
-            if self.buffer_prototype is None:
-                self.import_buffer = MPQueueImportBuffer(callback=callback, consumer=consumer)
-            else:
-                self.import_buffer = self.buffer_prototype(callback=callback,
-                                                           consumer=consumer)
-        del self.import_buffer.results_list[:]
-        rstub = None
-        if 'report' in kwargs:
-            rstub = kwargs.get('report')
-            if not isinstance(rstub, Report):
-                raise exceptions.QualysFrameworkException('Only Report objects'
-                                                          ' and subclasses can be passed to this function as reports.')
-        timeout = True
-        while timeout:
-            try:
+                if self.import_buffer is None:
+                    if self.buffer_prototype is None:
+                        self.import_buffer = MPQueueImportBuffer(callback=callback, consumer=consumer)
+                    else:
+                        self.import_buffer = self.buffer_prototype(callback=callback,
+                                                                   consumer=consumer)
+                del self.import_buffer.results_list[:]
+                rstub = None
+                if 'report' in kwargs:
+                    rstub = kwargs.get('report')
+                    if not isinstance(rstub, Report):
+                        raise exceptions.QualysFrameworkException('Only Report objects'
+                                                                  ' and subclasses can be passed to this function as reports.')
                 context = etree.iterparse(response, events=('end',), huge_tree=True)
                 # optional default elem/obj mapping override
                 local_elem_map = kwargs.get('obj_elem_map', queue_elem_map)
@@ -937,11 +929,11 @@ class QGSMPActions(QGActions):
                 import traceback
                 logger.warning('Error while parsing response')
                 logger.warn(traceback.format_exc())
+                print(response)
             except:
                 print('xml error')
                 import traceback
                 traceback.print_exc()
-                timeout = True
 
         for csmr in self.import_buffer.running:
             self.import_buffer.queueAdd(PoisonPill())
