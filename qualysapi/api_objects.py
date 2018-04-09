@@ -269,6 +269,10 @@ class VulnInfo(CacheableQualysObject):
     times_found = None
     type = None
     active_kernel = None
+    active_service = None
+    active_config = None
+    last_reopened = None
+    times_reopened = None
 
     def __init__(self, *args, **kwargs):
         param_map = {}
@@ -284,6 +288,8 @@ class VulnInfo(CacheableQualysObject):
             'PROTOCOL': ('protocol', unicode_str),
             'SSL': ('ssl', unicode_str),
             'AFFECT_RUNNING_KERNEL': ('active_kernel', unicode_str),
+            'AFFECT_RUNNING_SERVICE': ('active_service', unicode_str),
+            'AFFECT_EXPLOITABLE_CONFIG': ('active_config', unicode_str),
             # NOTE: I haven't implemented the format attribute because it is
             # always implied as 'table' with the data in RESULT being a
             # delim-text format of some kind (CSV/TSV/Columar Text) but the
@@ -306,6 +312,9 @@ class VulnInfo(CacheableQualysObject):
                                      qualys_datetime_to_python),
             'LAST_FIXED_DATETIME': ('last_fixed_datetime',
                                     qualys_datetime_to_python),
+            'LAST_REOPENED_DATETIME': ('last_reopened',
+                                    qualys_datetime_to_python),
+            'TIMES_REOPENED': ('times_reopened', unicode_str),
             'TIMES_FOUND': ('times_found', unicode_str),
             'VULN_STATUS': ('status', unicode_str),
             'STATUS': ('status', unicode_str),
@@ -2246,7 +2255,7 @@ class SimpleReturn(CacheableQualysObject):
             'RESPONSE': ('response', Response),
             'APPLIANCE': ('appliance', ApplianceResponse),
             'ITEM_LIST': ('items', ObjTypeList(ResponseItem,
-                                               xpath='ITEM')),
+                                               xpath='ITEM'))
         })
         super(SimpleReturn, self).__init__(*args, **kwargs)
 

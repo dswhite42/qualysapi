@@ -924,6 +924,12 @@ parser.')
             ('qids', None),  #: {value}
             ('severities', None),  #: {value}
             ('show_igs', None),  #: {0|1}
+            ('arf_kernel_filter', None),
+            ('arf_service_filter', None),
+            ('arf_config_filter', None),
+            ('host_metadata', None),
+            ('host_metadata_fields', None),
+            ('show_reopened_info', None),
             ('include_search_list_titles', None),  #: {value}
             ('exclude_search_list_titles', None),  #: {value}
             ('include_search_list_ids', None),  #: {value,value...}
@@ -937,6 +943,8 @@ parser.')
             ('suppress_duplicated_data_from_csv', None),  #: {0|1}
             ('max_days_since_last_vm_scan', None),  #: {value}
             ('max_days_since_detection_updated', None),
+            ('vm_scan_date_before', None),
+            ('vm_scan_date_after', None)
         ]
         call = '/api/2.0/fo/asset/host/vm/detection/'
         params = {
@@ -949,7 +957,7 @@ parser.')
                                   consumer_prototype=consumer_prototype,
                                   obj_elem_map={
                                       'HOST': Host,
-                                      'WARNING': AssetWarning,
+                                      'WARNING': AssetWarning
                                   },
                                   **kwargs)
 

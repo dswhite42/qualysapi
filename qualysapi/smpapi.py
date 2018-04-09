@@ -911,29 +911,39 @@ class QGSMPActions(QGActions):
                 # optional default elem/obj mapping override
                 local_elem_map = kwargs.get('obj_elem_map', queue_elem_map)
                 # logger.debug(local_elem_map)
+                added_items = 0
                 for event, elem in context:
                     # Use QName to avoid specifying or stripping the namespace, which we don't need
                     if exit.is_set():
                         logger.info('Exit event caused immediate return.')
                         break
                     stag = etree.QName(elem.tag).localname.upper()
+                    if stag == 'SIMPLE_RETURN':
+                        sr = SimpleReturn(elem=elem)
+                        if sr.response.response_code == "1905":
+                            print(sr.response.response_text)
+                            return []
                     if stag in local_elem_map:
                         # logger.debug('Adding type "%s" to queue.' % (local_elem_map[stag]))
                         item = local_elem_map[stag](elem=elem,
                                                     report_stub=rstub)
                         # #logger.debug("Adding %s to queue" % str(item.id))
                         self.import_buffer.queueAdd(item)
+                        added_items = added_items + 1
                         # elem.clear() #don't fill up a dom we don't need.
+                if not added_items:
+                    return []
                 timeout = False
             except lxml.etree.XMLSyntaxError:
                 import traceback
+                print(traceback.print_exc())
                 logger.warning('Error while parsing response')
                 logger.warn(traceback.format_exc())
                 print(response)
             except:
                 print('xml error')
                 import traceback
-                traceback.print_exc()
+                print(traceback.print_exc())
 
         for csmr in self.import_buffer.running:
             self.import_buffer.queueAdd(PoisonPill())
