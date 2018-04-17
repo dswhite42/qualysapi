@@ -950,7 +950,6 @@ class QGSMPActions(QGActions):
         results = self.import_buffer.finish(block=True)
         logger.debug("Checking results")
         self.checkResults(results)
-        print(results)
         # special case: report encapsulization...
         return results
 
