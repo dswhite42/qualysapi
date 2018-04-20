@@ -1079,6 +1079,52 @@ parser.')
         call = '/create/am/awsassetdataconnector/'
         return self.request(call, data=etree.tostring(service_request))
 
+    def deleteConnector(self, connector_id):
+        call = 'delete/am/assetdataconnector/%s' % connector_id
+        return self.request(call)
+
+    def searchConnectors(self, **kwargs):
+        optional_params = [
+            ('name', None),
+            ('id', None),
+            ('description', None),
+            ('lastSync', None),
+            ('lastError', None),
+            ('connectorState', None),
+            ('activation', None),
+            ('defaultTags.name', None),
+            ('defaultTag', None),
+            ('disabled', None),
+            ('name_operator', 'EQUALS'),
+            ('id_operator', 'EQUALS'),
+            ('description_operator', 'EQUALS'),
+            ('lastSync_operator', 'EQUALS'),
+            ('lastError_operator', 'EQUALS'),
+            ('connectorState_operator', 'EQUALS'),
+            ('activation_operator', 'EQUALS'),
+            ('defaultTags.name_operator', 'EQUALS'),
+            ('defaultTag_operator', 'EQUALS'),
+            ('disabled_operator', 'EQUALS')
+        ]
+        call = '/search/am/assetdataconnector'
+
+        params = {
+            key: kwargs.get(key, default) for (key, default) in
+            optional_params if kwargs.get(key, default) is not None
+        }
+        service_request = etree.Element('ServiceRequest')
+        filters = etree.Element('filters')
+        service_request.append(filters)
+        for field, value in params.items():
+            if not '_operator' in field:
+                criteria = etree.Element('Criteria')
+                criteria.attrib['field'] = field
+                criteria.attrib['operator'] = params['%s_operator' % field]
+                criteria.text = value
+                filters.append(criteria)
+        xml = fromstring(self.request(call, data=etree.tostring(service_request)))
+        return xmljson.parker.data(xml)
+
     def searchTags(self, **kwargs):
         optional_params = [
             ('name', None),

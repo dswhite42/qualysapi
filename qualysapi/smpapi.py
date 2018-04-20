@@ -922,7 +922,7 @@ class QGSMPActions(QGActions):
                         sr = SimpleReturn(elem=elem)
                         if sr.response.response_code == "1905":
                             print(sr.response.response_text)
-                            return []
+                            return [sr]
                     if stag in local_elem_map:
                         # logger.debug('Adding type "%s" to queue.' % (local_elem_map[stag]))
                         item = local_elem_map[stag](elem=elem,
