@@ -1028,6 +1028,26 @@ parser.')
         return self.parseResponse(source=call, data=params,
                                   obj_elem_map={'APPLIANCE': ApplianceResponse, 'SIMPLE_RETURN': SimpleReturn})
 
+    def addTags(self, tag_id, child_names):
+        service_request = etree.Element('ServiceRequest')
+        data = etree.Element('data')
+        service_request.append(data)
+        tag = etree.Element('Tag')
+        data.append(tag)
+        children = etree.Element('children')
+        tag.append(children)
+        set = etree.Element('set')
+        children.append(set)
+        for tag_name in child_names:
+            tag_simple = etree.Element('TagSimple')
+            set.append(tag_simple)
+            name = etree.Element('name')
+            name.text = str(tag_name)
+            tag_simple.append(name)
+        call = '/update/am/tag/%s' % tag_id
+        xml = fromstring(self.request(call, data=etree.tostring(service_request)))
+        return xmljson.parker.data(xml)
+
     def createConnector(self, connector_name, auth_id, tag_ids=[], region_codes=[]):
         # create XML
         service_request = etree.Element('ServiceRequest')
