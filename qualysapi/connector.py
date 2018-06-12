@@ -411,7 +411,7 @@ class QGConnector:
         headers = {"X-Requested-With": "Parag Baxi QualysAPI (python) v%s" % (qualysapi.version.__version__,)}
         logger.debug('headers =\n%s' % (str(headers)))
         # Portal API takes in XML text, requiring custom header.
-        if api_version in ('was'):
+        if str(api_version) in ('was'):
             headers['Content-Type'] = 'application/json'
             headers['Accept'] = 'application/xml'
             file = io.StringIO()
