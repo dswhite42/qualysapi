@@ -887,7 +887,6 @@ class QGSMPActions(QGActions):
                     response = self.stream_request(source, **kwargs)
                 else:
                     response = source
-
                 consumer = None
                 if 'consumer_prototype' in kwargs:
                     consumer = kwargs.pop('consumer_prototype')

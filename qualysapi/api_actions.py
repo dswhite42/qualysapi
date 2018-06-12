@@ -25,7 +25,6 @@ import threading
 # methods below wrap thread pools or process pools for asynchronous
 # multi-request parsing/consuming by a single calling program.
 
-
 class QGActions(object):
     import_buffer = None
     buffer_prototype = None
@@ -108,7 +107,6 @@ prototype is not an instance.')
             if not isinstance(rstub, Report):
                 raise exceptions.QualysFrameworkException('Only Report objects'
                                                           ' and subclasses can be passed to this function as reports.')
-
         context = etree.iterparse(response, events=('end',))
         # optional default elem/obj mapping override
         local_elem_map = kwargs.get('obj_elem_map', obj_elem_map)
@@ -1028,6 +1026,61 @@ parser.')
         return self.parseResponse(source=call, data=params,
                                   obj_elem_map={'APPLIANCE': ApplianceResponse, 'SIMPLE_RETURN': SimpleReturn})
 
+    def searchWASFindings(self, consumer_prototype=None, **kwargs):
+        limitResults = kwargs.get('limitResults', 1000)
+        startFromId = kwargs.get('startFromId', 1)
+        optional_params = [
+            ('id', 'Integer'),
+            ('qid', 'Integer'),
+            ('name', 'Text'),
+            ('type', 'Keyword', 'VULNERABILITY,SENSITIVE_CONTENT,INFORMATION_GATHERED'),
+            ('url', 'Text'),
+            ('webApp.tags.id', 'Integer'),
+            ('webApp.tags.name', 'Text'),
+            ('status', 'Keyword', 'NEW,ACTIVE,REOPENED'),
+            ('patch', 'Integer'),
+            ('webApp.id', 'Integer'),
+            ('webApp.name', 'Text'),
+            ('severity', 'Integer'),
+            ('externalRef', 'Text'),
+            ('ignoredDate', 'Date'),
+            ('ignoredReason', 'Keyword', 'FALSE_POSITIVE,RISK_ACCEPTED,NOT_APPLICABLE'),
+            ('group', 'Keyword', 'XSS,SQL,INFO,PATH,CC,SSN_US,CUSTOM'),
+            ('owasp.name', 'Text'),
+            ('owasp.code', 'Integer'),
+            ('wasc.name', 'Text'),
+            ('wasc.code', 'Integer'),
+            ('cwe.id', 'Integer'),
+            ('firstDetectedDate', 'Date'),
+            ('lastDetectedDate', 'Date'),
+            ('lastTestedDate', 'Date'),
+            ('timesDetected', 'Integer')
+        ]
+        params = {}
+        for (key, type, *keywords) in optional_params:
+            if kwargs.get(key) is not None and type in kwargs.get(key).types:
+                if type == 'Keyword':
+                    if kwargs.get(key).value not in keywords[0].split(','):
+                        continue
+                params[key] = kwargs.get(key)
+        payload = {"ServiceRequest": {
+            "preferences": {"limitResults": limitResults, "startFromId": startFromId}
+            }
+        }
+        if params:
+            payload['ServiceRequest']['filters'] = {"Criteria": []}
+            for field, op in params.items():
+                payload['ServiceRequest']['filters']['Criteria'].append(
+                    {"value": op.value, "field": field, "operator": op.operator})
+        call = '/search/was/finding/'
+        return self.parseResponse(source=call, data=payload,
+                                  consumer_prototype=consumer_prototype,
+                                  obj_elem_map={
+                                      'SERVICERESPONSE': WASServiceResponse,
+                                      'FINDING': WASServiceResponse.Finding
+                                  },
+                                  **kwargs)
+
     def createConnector(self, connector_name, auth_id, tag_ids=[], region_codes=[]):
         # create XML
         service_request = etree.Element('ServiceRequest')
@@ -1193,7 +1246,7 @@ parser.')
         service_request.append(data)
         aws_auth = etree.Element('AwsAuthRecord')
         data.append(aws_auth)
-        for k,v in params.items():
+        for k, v in params.items():
             node = etree.Element(k)
             node.text = v
             aws_auth.append(node)
@@ -1254,6 +1307,72 @@ parser.')
                             break
                     except:
                         break
+                if isinstance(itm, WASServiceResponse):
+                    id_min_tmp = itm.lastId
+                    try:
+                        id_min_tmp = int(id_min_tmp)
+                        if id_min_tmp > prev_id_min:
+                            id_min = id_min_tmp
+                            logger.debug("ID_MIN: %s" % id_min)
+                            break
+                    except:
+                        continue
+        return
+
+    def wasIterativeWrapper(self, consumer_prototype=None, max_results=0,
+                              list_type_combine=None, exit=None, internal_call=None, **kwargs):
+        """assetIterativeWrapper
+
+        A common handler for the asset API to iterative many requests.  This
+        can take significant time.
+
+        :param consumer_prototype: Optional.  Result consumer.
+        :param max_results: Optional.  Maximum number of results to return.
+        :param list_type_combine: Optional.  Combine lists objects.
+        :param exit: threading.Event or multiprocessing.Event.  Used to
+        interrupt this function and return.
+        :param internal_call: The internal funciton being iterated over.
+        :param **kwargs: Arguments to internal_call.
+        """
+        if not internal_call:
+            raise exceptions.QualysFrameworkException('Misuse of iterator.')
+        if not exit:
+            exit = threading.Event()
+        # 1000 is the default so no need to pass on
+        orig_truncation_limit = int(kwargs.get('truncation_limit', 1000))
+        # ok so basically if there is a WARNING then check the CODE, parse the
+        # URL and continue the loop.  Logging is preferred.
+        id_min = kwargs.get('startFromId', 1)
+        itercount = 0
+        while id_min and not exit.is_set():
+            # reset each iteration
+            truncation_limit = orig_truncation_limit
+            itercount += 1
+            if max_results and orig_truncation_limit * itercount > max_results:
+                truncation_limit = max_results - (orig_truncation_limit * (itercount - 1))
+                if truncation_limit <= 0:
+                    id_min = None
+                    continue
+                else:
+                    kwargs['truncation_limit'] = truncation_limit
+            # update the id_min for this iteration
+            kwargs['startFromId'] = id_min
+            # make sure blocking is disabled
+            kwargs['block'] = False
+            prev_result = internal_call(consumer_prototype, exit=exit, **kwargs)
+            prev_id_min = id_min
+            id_min = None
+            for itm in reversed(prev_result):
+                if isinstance(itm, WASServiceResponse):
+                    id_min_tmp = itm.lastId
+                    try:
+                        id_min_tmp = int(id_min_tmp) + 1
+                        if id_min_tmp > prev_id_min:
+                            id_min = id_min_tmp
+                            print("ID_MIN: %s" % id_min)
+                            break
+                    except:
+                        continue
         return
 
     def iterativeHostDetectionQuery(self, **kwargs):
@@ -1282,6 +1401,9 @@ parser.')
         """
         return self.assetIterativeWrapper(
             internal_call=self.assetGroupQuery, **kwargs)
+
+    def iterativeWASSearchQuery(self, **kwargs):
+        return self.wasIterativeWrapper(internal_call=self.searchWASFindings, **kwargs)
 
     def finish(self):
         if self.import_buffer is not None:

@@ -62,6 +62,63 @@ class ObjTypeList(object):
         return True if self.xpath else False
 
 
+class WASCriteria(object):
+    value = None
+
+    def __init__(self, value):
+        self.value = value
+        if not value:
+            raise exceptions.QualysFrameworkException('No field or value specified for WAS criteria')
+
+
+class EQUALS(WASCriteria):
+    operator = 'EQUALS'
+    types = ['Integer', 'Text', 'Date', 'Keyword']
+
+    def __init__(self, *args, **kwargs):
+        super(EQUALS, self).__init__(*args, **kwargs)
+
+
+class NOT_EQUALS(WASCriteria):
+    operator = 'NOT EQUALS'
+    types = ['Integer', 'Text', 'Date', 'Keyword']
+
+    def __init__(self, *args, **kwargs):
+        super(NOT_EQUALS, self).__init__(*args, **kwargs)
+
+
+class GREATER(WASCriteria):
+    operator = 'GREATER'
+    types = ['Integer', 'Date']
+
+    def __init__(self, *args, **kwargs):
+        super(GREATER, self).__init__(*args, **kwargs)
+
+
+class LESSER(WASCriteria):
+    operator = 'LESSER'
+    types = ['Integer', 'Date']
+
+    def __init__(self, *args, **kwargs):
+        super(LESSER, self).__init__(*args, **kwargs)
+
+
+class IN(WASCriteria):
+    operator = 'IN'
+    types = ['Integer', 'Keyword']
+
+    def __init__(self, *args, **kwargs):
+        super(IN, self).__init__(*args, **kwargs)
+
+
+class IS_EMPTY(WASCriteria):
+    operator = 'IS EMPTY'
+    types = ['Text']
+
+    def __init__(self, *args, **kwargs):
+        super(IS_EMPTY, self).__init__(*args, **kwargs)
+
+
 class CacheableQualysObject(object):
     '''
     A base class implementing the api framework
@@ -313,7 +370,7 @@ class VulnInfo(CacheableQualysObject):
             'LAST_FIXED_DATETIME': ('last_fixed_datetime',
                                     qualys_datetime_to_python),
             'LAST_REOPENED_DATETIME': ('last_reopened',
-                                    qualys_datetime_to_python),
+                                       qualys_datetime_to_python),
             'TIMES_REOPENED': ('times_reopened', unicode_str),
             'TIMES_FOUND': ('times_found', unicode_str),
             'VULN_STATUS': ('status', unicode_str),
@@ -589,6 +646,88 @@ class Host(CacheableQualysObject):
         super(Host, self).__init__(*args, **kwargs)
 
         self.parent_stub = kwargs.get('report_stub', None)
+
+
+class WASServiceResponse(CacheableQualysObject):
+    responseCode = None
+    count = None
+    hasMoreRecords = None
+    lastId = None
+    data = None
+    findings = None
+    error = None
+
+    class WebApp(CacheableQualysObject):
+        id = None
+        name = None
+        url = None
+
+        def __init__(self, *args, **kwargs):
+            if 'elem' in kwargs or 'xml' in kwargs:
+                param_map = {}
+                if 'param_map' in kwargs:
+                    param_map = kwargs.pop('param_map', {})
+                kwargs['param_map'] = param_map
+                kwargs['param_map'].update({
+                    'id': ('id', unicode_str),
+                    'name': ('name', unicode_str),
+                    'url': ('url', unicode_str)
+                })
+                super(WASServiceResponse.WebApp, self).__init__(*args, **kwargs)
+
+    class Finding(CacheableQualysObject):
+        id = None
+        qid = None
+        name = None
+        type = None
+        findingType = None
+        severity = None
+        url = None
+        status = None
+        firstDetectedDate = None
+        lastDetectedDate = None
+        lastTestedDate = None
+        timesDetected = None
+        webApp = None
+
+        def __init__(self, *args, **kwargs):
+            if 'elem' in kwargs or 'xml' in kwargs:
+                param_map = {}
+                if 'param_map' in kwargs:
+                    param_map = kwargs.pop('param_map', {})
+                kwargs['param_map'] = param_map
+                kwargs['param_map'].update({
+                    'id': ('id', unicode_str),
+                    'qid': ('qid', unicode_str),
+                    'name': ('name', unicode_str),
+                    'type': ('type', unicode_str),
+                    'findingType': ('findingType', unicode_str),
+                    'severity': ('severity', unicode_str),
+                    'url': ('url', unicode_str),
+                    'status': ('status', unicode_str),
+                    'firstDetectedDate': ('firstDetectedDate', qualys_datetime_to_python),
+                    'lastDetectedDate': ('lastDetectedDate', qualys_datetime_to_python),
+                    'lastTestedDate': ('lastTestedDate', unicode_str),
+                    'timesDetected': ('timesDetected', unicode_str),
+                    'webApp': ('webApp', WASServiceResponse.WebApp)
+                })
+            super(WASServiceResponse.Finding, self).__init__(*args, **kwargs)
+
+    def __init__(self, *args, **kwargs):
+        param_map = {}
+        if 'param_map' in kwargs:
+            param_map = kwargs.pop('param_map', {})
+        kwargs['param_map'] = param_map
+        kwargs['param_map'].update({
+            'responseCode': ('responseCode', unicode_str),
+            'count': ('count', unicode_str),
+            'hasMoreRecords': ('hasMoreRecords', unicode_str),
+            'lastId': ('lastId', unicode_str),
+            #'data': ('findings', ObjTypeList(WASServiceResponse.Finding, xpath='Finding')),
+            'responseErrorDetails': ('error', unicode_str)
+        })
+
+        super(WASServiceResponse, self).__init__(*args, **kwargs)
 
 
 class InterfaceSettings(CacheableQualysObject):
@@ -2188,6 +2327,7 @@ class Response(CacheableQualysObject):
         })
         super(Response, self).__init__(*args, **kwargs)
 
+
 class ApplianceResponse(CacheableQualysObject):
     id = None
     friendly_name = None
@@ -2206,6 +2346,7 @@ class ApplianceResponse(CacheableQualysObject):
             'REMAINING_QVSA_LICENSES': ('remaining_qvsa_licenses', unicode_str),
         })
         super(ApplianceResponse, self).__init__(*args, **kwargs)
+
 
 class SimpleReturn(CacheableQualysObject):
     '''A wrapper for qualys responses to api commands (as opposed to requests).

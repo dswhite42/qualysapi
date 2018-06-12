@@ -12,7 +12,8 @@ import urllib.parse
 from collections import defaultdict
 
 import requests
-
+import io
+import json
 import qualysapi.version
 from qualysapi.api_methods import api_methods
 from qualysapi.api_methods import api_methods_with_trailing_slash
@@ -216,11 +217,13 @@ class QGConnector:
                 # Convert to dictionary.
                 data = urllib.parse.parse_qs(data)
                 logger.debug('Converted:\n%s' % str(data))
-        elif api_version in ('am', 'was'):
+        elif api_version in ('am'):
             if type(data) == etree._Element:
                 logger.debug('Converting lxml.builder.E to string')
                 data = etree.tostring(data)
                 logger.debug('Converted:\n%s' % data)
+        elif api_version in ('was'):
+            data = json.dumps(data)
         return data
 
 
@@ -255,8 +258,10 @@ class QGConnector:
         headers = {"X-Requested-With": "Parag Baxi QualysAPI (python) v%s" % (qualysapi.version.__version__,)}
         logger.debug('headers =\n%s' % (str(headers)))
         # Portal API takes in XML text, requiring custom header.
-        if api_version in ('am', 'was'):
+        if str(api_version) in ('am'):
             headers['Content-type'] = 'text/xml'
+        if str(api_version) in ('was'):
+            headers['Content-type'] = 'application/json'
         #
         # Set up http request method, if not specified.
         if not http_method:
@@ -406,8 +411,11 @@ class QGConnector:
         headers = {"X-Requested-With": "Parag Baxi QualysAPI (python) v%s" % (qualysapi.version.__version__,)}
         logger.debug('headers =\n%s' % (str(headers)))
         # Portal API takes in XML text, requiring custom header.
-        if api_version in ('am', 'was'):
-            headers['Content-type'] = 'text/xml'
+        if api_version in ('was'):
+            headers['Content-Type'] = 'application/json'
+            headers['Accept'] = 'application/xml'
+            file = io.StringIO()
+            file.write(json.dumps(data))
         #
         # Set up http request method, if not specified.
         if not http_method:
