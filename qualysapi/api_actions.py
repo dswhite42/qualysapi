@@ -1026,6 +1026,59 @@ parser.')
         return self.parseResponse(source=call, data=params,
                                   obj_elem_map={'APPLIANCE': ApplianceResponse, 'SIMPLE_RETURN': SimpleReturn})
 
+    def createARNConnector(self, connector_name, arn_string, external_id, tag_ids=[], region_codes=[], consumer_prototype=None,
+                           **kwargs):
+        # create XML
+        service_request = etree.Element('ServiceRequest')
+        data = etree.Element('data')
+        service_request.append(data)
+        connector = etree.Element('AwsAssetDataConnector')
+        data.append(connector)
+        name = etree.Element('name')
+        name.text = connector_name
+        connector.append(name)
+        default_tags = etree.Element('defaultTags')
+        connector.append(default_tags)
+        set = etree.Element('set')
+        default_tags.append(set)
+        for tag_id in tag_ids:
+            tag_simple = etree.Element('TagSimple')
+            set.append(tag_simple)
+            id = etree.Element('id')
+            id.text = str(tag_id)
+            tag_simple.append(id)
+        activation = etree.Element('activation')
+        connector.append(activation)
+        activation_set = etree.Element('set')
+        activation.append(activation_set)
+        activation_module = etree.Element('ActivationModule')
+        activation_module.text = 'VM'
+        activation_set.append(activation_module)
+        arn = etree.Element('arn')
+        connector.append(arn)
+        arn.text = arn_string
+        external_id_tag = etree.Element('externalId')
+        connector.append(external_id_tag)
+        external_id_tag.text = str(external_id)
+        if not len(region_codes):
+            all_regions = etree.Element('allRegions')
+            all_regions.text = 'true'
+            connector.append(all_regions)
+        else:
+            endpoints = etree.Element('endpoints')
+            connector.append(endpoints)
+            endpoint_set = etree.Element('set')
+            endpoints.append(endpoint_set)
+            for region in region_codes:
+                aws_endpoint = etree.Element('AwsEndpointSimple')
+                endpoint_set.append(aws_endpoint)
+                region_code = etree.Element('regionCode')
+                region_code.text = region
+                aws_endpoint.append(region_code)
+
+        call = '/create/am/awsassetdataconnector/'
+        print(etree.tostring(service_request))
+        return self.request(call, data=service_request)
 
     def searchWASFindings(self, consumer_prototype=None, **kwargs):
         limitResults = kwargs.get('limitResults', 1000)
@@ -1066,7 +1119,7 @@ parser.')
                 params[key] = kwargs.get(key)
         payload = {"ServiceRequest": {
             "preferences": {"limitResults": limitResults, "startFromId": startFromId}
-            }
+        }
         }
         if params:
             payload['ServiceRequest']['filters'] = {"Criteria": []}
@@ -1102,7 +1155,7 @@ parser.')
         xml = fromstring(self.request(call, data=etree.tostring(service_request)))
         return xmljson.parker.data(xml)
 
-    def createConnector(self, connector_name, auth_id, tag_ids=[], region_codes=[]):
+    def createAuthConnector(self, connector_name, auth_id, tag_ids=[], region_codes=[]):
         # create XML
         service_request = etree.Element('ServiceRequest')
         data = etree.Element('data')
@@ -1387,7 +1440,7 @@ parser.')
         return
 
     def wasIterativeWrapper(self, consumer_prototype=None, max_results=0,
-                              list_type_combine=None, exit=None, internal_call=None, **kwargs):
+                            list_type_combine=None, exit=None, internal_call=None, **kwargs):
         """assetIterativeWrapper
 
         A common handler for the asset API to iterative many requests.  This

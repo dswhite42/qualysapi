@@ -315,7 +315,7 @@ class MPQueueImportBuffer(QueueImportBuffer):
         self.results_queue = multiprocessing.JoinableQueue()
         self.response_error = multiprocessing.Event
 
-    def queueAdd(self, item):
+    def add(self, item):
         try:
             self.queue.put(item)
         except AssertionError:
@@ -927,7 +927,7 @@ class QGSMPActions(QGActions):
                         item = local_elem_map[stag](elem=elem,
                                                     report_stub=rstub)
                         # #logger.debug("Adding %s to queue" % str(item.id))
-                        self.import_buffer.queueAdd(item)
+                        self.import_buffer.add(item)
                         added_items = added_items + 1
                         # elem.clear() #don't fill up a dom we don't need.
                 if not added_items:
@@ -944,8 +944,9 @@ class QGSMPActions(QGActions):
                 import traceback
                 print(traceback.print_exc())
 
-        for csmr in self.import_buffer.running:
-            self.import_buffer.queueAdd(PoisonPill())
+        if hasattr(self.import_buffer, "running"):
+            for csmr in running:
+                self.import_buffer.add(PoisonPill())
         results = self.import_buffer.finish(block=True)
         logger.debug("Checking results")
         self.checkResults(results)
