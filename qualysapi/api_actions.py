@@ -1026,6 +1026,22 @@ parser.')
         return self.parseResponse(source=call, data=params,
                                   obj_elem_map={'APPLIANCE': ApplianceResponse, 'SIMPLE_RETURN': SimpleReturn})
 
+    def assignScannerToNetwork(self, appliance_id, network_id, **kwargs):
+        optional_params = [
+            ('action', 'assign_network_id'),
+            ('appliance_id', appliance_id),
+            ('network_id', network_id)
+        ]
+        call = '/api/2.0/fo/appliance/'
+
+        params = {
+            key: kwargs.get(key, default) for (key, default) in
+            optional_params if kwargs.get(key, default) is not None
+        }
+        # return self.request(call, data=params)
+        return self.parseResponse(source=call, data=params,
+                                  obj_elem_map={'APPLIANCE': ApplianceResponse, 'SIMPLE_RETURN': SimpleReturn})
+
     def createARNConnector(self, connector_name, arn_string, external_id, tag_ids=[], region_codes=[], consumer_prototype=None,
                            **kwargs):
         # create XML
@@ -1077,6 +1093,58 @@ parser.')
                 aws_endpoint.append(region_code)
 
         call = '/create/am/awsassetdataconnector/'
+        print(etree.tostring(service_request))
+        return self.request(call, data=service_request)
+
+    def updateARNConnector(self, connector_id, consumer_prototype=None,
+                           **kwargs):
+        # create XML
+        '''
+        <ServiceRequest>
+            <data>
+                <AwsAssetDataConnector>
+                    <arn>arn:aws:iam::205767712438:role/qualys_dev_test</arn>
+                    <externalId>123456789</externalId>
+                </AwsAssetDataConnector>
+            </data>
+        </ServiceRequest>
+        '''
+        connector_name = kwargs.get('connector_name')
+        tag_ids = kwargs.get('tag_ids')
+        arn_string = kwargs.get('arn_string')
+        external_id = kwargs.get('external_id')
+        if tag_ids and not isinstance(tag_ids, list):
+            tag_ids = [tag_ids]
+        service_request = etree.Element('ServiceRequest')
+        data = etree.Element('data')
+        service_request.append(data)
+        connector = etree.Element('AwsAssetDataConnector')
+        data.append(connector)
+        if connector_name:
+            name = etree.Element('name')
+            name.text = connector_name
+            connector.append(name)
+        if tag_ids:
+            default_tags = etree.Element('defaultTags')
+            connector.append(default_tags)
+            set = etree.Element('set')
+            default_tags.append(set)
+            for tag_id in tag_ids:
+                tag_simple = etree.Element('TagSimple')
+                set.append(tag_simple)
+                id = etree.Element('id')
+                id.text = str(tag_id)
+                tag_simple.append(id)
+        if arn_string:
+            arn = etree.Element('arn')
+            connector.append(arn)
+            arn.text = arn_string
+        if external_id:
+            external_id_tag = etree.Element('externalId')
+            connector.append(external_id_tag)
+            external_id_tag.text = str(external_id)
+
+        call = '/update/am/awsassetdataconnector/%s' % connector_id
         print(etree.tostring(service_request))
         return self.request(call, data=service_request)
 
