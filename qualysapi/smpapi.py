@@ -945,7 +945,7 @@ class QGSMPActions(QGActions):
                 print(traceback.print_exc())
 
         if hasattr(self.import_buffer, "running"):
-            for csmr in running:
+            for csmr in self.import_buffer.running:
                 self.import_buffer.add(PoisonPill())
         results = self.import_buffer.finish(block=True)
         logger.debug("Checking results")
