@@ -243,6 +243,11 @@ class QGConnector:
         #
         # Determine API version.
         # Preformat call.
+        timeout = kwargs.get('timeout', 180)
+        try:
+            timeout = int(timeout)
+        except:
+            timeout = 180
         api_call = util.preformat_call(api_call)
         if api_version:
             # API version specified, format API version inputted.
@@ -292,7 +297,7 @@ class QGConnector:
                     auth=self.auth,
                     headers=headers,
                     proxies=self.proxies,
-                    timeout=180)
+                    timeout=timeout)
             else:
                 # POST
                 logger.debug('POST request.')
@@ -302,7 +307,7 @@ class QGConnector:
                     auth=self.auth,
                     headers=headers,
                     proxies=self.proxies,
-                    timeout=180)
+                    timeout=timeout)
             logger.debug('response headers =\n%s' % (str(request.headers)))
             #
             # Remember how many times left user can make against api_call.
@@ -396,6 +401,11 @@ class QGConnector:
         #
         # Determine API version.
         # Preformat call.
+        timeout = kwargs.get('timeout', 180)
+        try:
+            timeout = int(timeout)
+        except:
+            timeout = 180
         api_call = util.preformat_call(api_call)
         if api_version:
             # API version specified, format API version inputted.
@@ -450,7 +460,7 @@ class QGConnector:
                     headers=headers,
                     proxies=self.proxies,
                     stream=True,
-                    timeout=180
+                    timeout=timeout, # add a 3 minute timeout.. q b slow
                 )
         else:
             # POST
@@ -463,7 +473,7 @@ class QGConnector:
                     headers=headers,
                     proxies=self.proxies,
                     stream=True,
-                    timeout=180
+                    timeout=timeout, # add a 3 minute timeout.. q b slow
                 )
         if response is not None and response.status_code == 401:
             response.close()
