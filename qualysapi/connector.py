@@ -228,7 +228,7 @@ class QGConnector:
 
 
     def request(self, api_call, data=None, api_version=None, http_method=None, concurrent_scans_retries=0,
-                concurrent_scans_retry_delay=0):
+                concurrent_scans_retry_delay=0, **kwargs):
         """ Return QualysGuard API response.
 
         """
