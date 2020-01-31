@@ -244,6 +244,7 @@ class QGConnector:
         # Determine API version.
         # Preformat call.
         timeout = kwargs.get('timeout', 180)
+        request_content_type = kwargs.get('request_content_type')
         try:
             timeout = int(timeout)
         except:
@@ -263,10 +264,16 @@ class QGConnector:
         headers = {"X-Requested-With": "Parag Baxi QualysAPI (python) v%s" % (qualysapi.version.__version__,)}
         logger.debug('headers =\n%s' % (str(headers)))
         # Portal API takes in XML text, requiring custom header.
+        # We'll try to guess what to use, but since some (like WAS) can take XML or JSON requests, we'll allow
+        # the guessing to be overridden
+        if request_content_type == 'xml':
+            headers['Content-type'] = 'text/xml'
+        elif request_content_type == 'json':
+            headers['Accept'] = 'application/json'
         if str(api_version) in ('am'):
             headers['Content-type'] = 'text/xml'
         if str(api_version) in ('was'):
-            headers['Content-type'] = 'application/json'
+            headers['Accept'] = 'application/json'
         #
         # Set up http request method, if not specified.
         if not http_method:
