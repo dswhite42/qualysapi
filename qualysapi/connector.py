@@ -201,7 +201,7 @@ class QGConnector:
         return api_call
 
 
-    def format_payload(self, api_version, data):
+    def format_payload(self, api_version, request_content_type, data):
         """ Return appropriate QualysGuard API call.
 
         """
@@ -223,7 +223,9 @@ class QGConnector:
                 data = etree.tostring(data)
                 logger.debug('Converted:\n%s' % data)
         elif api_version in ('was'):
-            data = json.dumps(data)
+            # JSON, unless overridden
+            if request_content_type != 'xml':
+                data = json.dumps(data)
         return data
 
 
@@ -243,8 +245,8 @@ class QGConnector:
         #
         # Determine API version.
         # Preformat call.
-        timeout = kwargs.get('timeout', 180)
         request_content_type = kwargs.get('request_content_type')
+        timeout = kwargs.get('timeout', 180)
         try:
             timeout = int(timeout)
         except:
@@ -262,7 +264,6 @@ class QGConnector:
         #
         # Set up headers.
         headers = {"X-Requested-With": "Parag Baxi QualysAPI (python) v%s" % (qualysapi.version.__version__,)}
-        logger.debug('headers =\n%s' % (str(headers)))
         # Portal API takes in XML text, requiring custom header.
         # We'll try to guess what to use, but since some (like WAS) can take XML or JSON requests, we'll allow
         # the guessing to be overridden
@@ -270,10 +271,11 @@ class QGConnector:
             headers['Content-type'] = 'text/xml'
         elif request_content_type == 'json':
             headers['Accept'] = 'application/json'
-        if str(api_version) in ('am'):
+        elif str(api_version) in ('am'):
             headers['Content-type'] = 'text/xml'
-        if str(api_version) in ('was'):
+        elif str(api_version) in ('was'):
             headers['Accept'] = 'application/json'
+        logger.debug('headers =\n%s' % (str(headers)))
         #
         # Set up http request method, if not specified.
         if not http_method:
@@ -288,7 +290,8 @@ class QGConnector:
         #
         # Format data, if applicable.
         if data is not None:
-            data = self.format_payload(api_version, data)
+            data = self.format_payload(api_version, request_content_type, data)
+        # logger.debug('Will send data: {}'.format(data))
         # Make request at least once (more if concurrent_retry is enabled).
         retries = 0
         while retries <= concurrent_scans_retries:
@@ -408,6 +411,7 @@ class QGConnector:
         #
         # Determine API version.
         # Preformat call.
+        request_content_type = kwargs.get('request_content_type')
         timeout = kwargs.get('timeout', 180)
         try:
             timeout = int(timeout)
@@ -447,7 +451,7 @@ class QGConnector:
         #
         # Format data, if applicable.
         if data is not None:
-            data = self.format_payload(api_version, data)
+            data = self.format_payload(api_version, request_content_type, data)
         # this call should be results/maps oriented for large domains and/or maps and/or asset groups so
         # there really is no need or benefit to using concurrent scans here...
         # use a stream-based non-blocking request
