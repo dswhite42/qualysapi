@@ -22,6 +22,9 @@ def connect(**kwargs):
         'remember_me'        : False,
         'remember_me_always' : False
     }
+    # Sometimes qualysapi mistakenly uses "server" instead of "hostname"
+    if 'server' in kwargs and 'hostname' not in kwargs:
+        kwargs['hostname'] = kwargs['server']
     defaults.update(kwargs)
 
     """ Return a QGAPIConnect object for v1 API pulling settings from config
