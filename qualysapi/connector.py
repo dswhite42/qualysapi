@@ -50,9 +50,9 @@ class QGConnector:
         self.auth = auth
         # Remember QualysGuard API server.
         # (dwhite2, 2020-04-16 - this function actually gets called with "hostname" as a param)
-        if 'hostname' in kwargs:
+        if 'hostname' in kwargs and kwargs.get('hostname'):
             self.__server = kwargs['hostname']
-        elif 'server' in kwargs:
+        elif 'server' in kwargs and kwargs.get('server'):
             self.__server = kwargs['server']
         # Remember rate limits per call.
         if 'rate_limit_remaining' in kwargs:
