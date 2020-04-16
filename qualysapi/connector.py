@@ -49,7 +49,10 @@ class QGConnector:
         # Read username & password from file, if possible.
         self.auth = auth
         # Remember QualysGuard API server.
-        if 'server' in kwargs:
+        # (dwhite2, 2020-04-16 - this function actually gets called with "hostname" as a param)
+        if 'hostname' in kwargs:
+            self.__server = kwargs['hostname']
+        elif 'server' in kwargs:
             self.__server = kwargs['server']
         # Remember rate limits per call.
         if 'rate_limit_remaining' in kwargs:
